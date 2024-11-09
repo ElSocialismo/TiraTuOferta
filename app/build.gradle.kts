@@ -84,6 +84,8 @@ dependencies {
     implementation("androidx.compose.material:material:1.5.0") // o la versión más reciente
 
     // Glide for Image Loading
+    implementation("io.coil-kt:coil-compose:2.1.0")
+
     implementation("com.github.bumptech.glide:glide:4.15.1")
     implementation(libs.firebase.firestore.ktx)
     implementation(libs.androidx.navigation.compose)

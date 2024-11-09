@@ -20,24 +20,24 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.tiratuoferta.components.BottomNavBar
+import com.example.tiratuoferta.components.DrawerContent
 import com.example.tiratuoferta.models.Auction
-import com.example.tiratuoferta.screens.AyudaScreen
-import com.example.tiratuoferta.screens.CerrarSesionScreen
-import com.example.tiratuoferta.screens.ContactarScreen
-import com.example.tiratuoferta.screens.IdiomaScreen
-import com.example.tiratuoferta.screens.MisSubastasScreen
+import com.example.tiratuoferta.screens.*
 import com.example.tiratuoferta.ui.theme.TiraTuOfertaTheme
 import com.google.firebase.database.FirebaseDatabase
 import kotlinx.coroutines.launch
-
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.DatabaseReference
 
 class HomeActivity : ComponentActivity() {
     private lateinit var auth: FirebaseAuth
+    private lateinit var database: DatabaseReference
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         auth = FirebaseAuth.getInstance()
+        database = FirebaseDatabase.getInstance().getReference("auctions")
+
         setContent {
             TiraTuOfertaTheme {
                 MainScreen()
@@ -53,13 +53,11 @@ class HomeActivity : ComponentActivity() {
     private fun checkAuthenticationStatus() {
         val currentUser = auth.currentUser
         if (currentUser == null) {
-            // Redirige a la pantalla de inicio de sesión
             startActivity(Intent(this, LoginActivity::class.java))
             finish()
         }
     }
 }
-
 
 @Composable
 fun MainScreen() {
@@ -102,7 +100,7 @@ fun MainScreen() {
                 startDestination = BottomNavItem.Home.route,
                 Modifier.padding(innerPadding)
             ) {
-                composable(BottomNavItem.Home.route) { HomeScreenContent() }
+                composable(BottomNavItem.Home.route) { AuctionList(navController) }
                 composable(BottomNavItem.Categories.route) { CategoriesScreen() }
                 composable(BottomNavItem.Favorites.route) { FavoritesScreen() }
                 composable(BottomNavItem.Profile.route) { ProfileScreen() }
@@ -111,7 +109,10 @@ fun MainScreen() {
                         saveAuctionToFirebase(auction)
                     })
                 }
-                // Nuevas rutas para las opciones del menú lateral
+                composable("auctionDetails/{auctionId}") { backStackEntry ->
+                    val auctionId = backStackEntry.arguments?.getString("auctionId") ?: ""
+                    AuctionDetailsScreen(auctionId)
+                }
                 composable("misSubastas") { MisSubastasScreen() }
                 composable("contactar") { ContactarScreen() }
                 composable("idioma") { IdiomaScreen() }
@@ -122,54 +123,13 @@ fun MainScreen() {
     }
 }
 
-@Composable
-fun HomeScreenContent() {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(text = "Bienvenido a tu app de subastas")
-    }
-}
-
-@Composable
-fun DrawerContent(navController: NavController) {
-    Column {
-        Text(
-            text = "Menú de Navegación",
-            modifier = Modifier.padding(16.dp),
-            style = MaterialTheme.typography.h6
-        )
-        Divider()
-        DrawerItem("Mis Subastas") { navController.navigate("misSubastas") }
-        DrawerItem("Añadir Subasta") { navController.navigate("createAuction") }
-        DrawerItem("Contactar") { navController.navigate("contactar") }
-        DrawerItem("Idioma") { navController.navigate("idioma") }
-        DrawerItem("Ayuda") { navController.navigate("ayuda") }
-        DrawerItem("Cerrar sesión") { navController.navigate("cerrarSesion") }
-    }
-}
-
-@OptIn(ExperimentalMaterialApi::class)
-@Composable
-fun DrawerItem(text: String, onClick: () -> Unit) {
-    ListItem(
-        modifier = Modifier.clickable(onClick = onClick),
-        text = { Text(text) }
-    )
-}
-
-// Función para guardar la subasta en Firebase Realtime Database
 fun saveAuctionToFirebase(auction: Auction) {
     val database = FirebaseDatabase.getInstance().getReference("auctions")
     database.child(auction.id).setValue(auction)
         .addOnSuccessListener {
-            // Aquí puedes mostrar un mensaje de éxito o realizar alguna acción adicional
+            // Éxito
         }
         .addOnFailureListener { e ->
-            // Aquí puedes manejar errores en caso de que la subasta no se guarde correctamente
+            // Manejo de errores
         }
 }
