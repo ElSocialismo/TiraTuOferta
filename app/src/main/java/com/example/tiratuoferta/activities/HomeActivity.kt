@@ -23,6 +23,9 @@ import androidx.compose.material3.Text
 import androidx.compose.ui.Alignment
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.example.tiratuoferta.models.Auction
+import com.google.firebase.database.FirebaseDatabase
+import java.util.UUID
 
 class HomeActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -43,7 +46,7 @@ fun MainScreen() {
         bottomBar = { BottomNavBar(navController) },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = { /* Acción del botón flotante */ },
+                onClick = { navController.navigate("createAuction") },
                 modifier = Modifier.padding(16.dp)
             ) {
                 Icon(Icons.Filled.Add, contentDescription = "Add")
@@ -59,6 +62,11 @@ fun MainScreen() {
             composable(BottomNavItem.Categories.route) { CategoriesScreen() }
             composable(BottomNavItem.Favorites.route) { FavoritesScreen() }
             composable(BottomNavItem.Profile.route) { ProfileScreen() }
+            composable("createAuction") {
+                CreateAuctionScreen(navController = navController, saveAuction = { auction ->
+                    saveAuctionToFirebase(auction)
+                })
+            }
         }
     }
 }
@@ -74,4 +82,16 @@ fun HomeScreenContent() {
     ) {
         Text(text = "Bienvenido a tu app de subastas")
     }
+}
+
+// Función para guardar la subasta en Firebase Realtime Database
+fun saveAuctionToFirebase(auction: Auction) {
+    val database = FirebaseDatabase.getInstance().getReference("auctions")
+    database.child(auction.id).setValue(auction)
+        .addOnSuccessListener {
+            // Aquí puedes mostrar un mensaje de éxito o realizar alguna acción adicional
+        }
+        .addOnFailureListener { e ->
+            // Aquí puedes manejar errores en caso de que la subasta no se guarde correctamente
+        }
 }
