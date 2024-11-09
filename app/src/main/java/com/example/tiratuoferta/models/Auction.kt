@@ -18,3 +18,10 @@ data class Auction(
     val participants: MutableMap<String, Boolean>? = null,
     var Favorite: Boolean = false
 ) : Parcelable
+@Parcelize
+data class Bid(
+    val userId: String = "",
+    val amount: Double = 0.0,
+    val timestamp: Long = System.currentTimeMillis()
+) : Parcelable
+

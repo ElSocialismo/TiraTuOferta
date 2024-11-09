@@ -23,22 +23,26 @@ fun BottomNavBar(navController: NavController) {
         // Obtenemos el estado actual del BackStackEntry
         val navBackStackEntry by navController.currentBackStackEntryAsState()
         val currentRoute = navBackStackEntry?.destination?.route
+
         items.forEach { item ->
             BottomNavigationItem(
                 icon = { Icon(imageVector = item.icon, contentDescription = item.title) },
                 label = { Text(item.title) },
                 selected = currentRoute == item.route,
                 onClick = {
-                    // Evitamos que se navegue de nuevo a la misma ruta
                     if (currentRoute != item.route) {
-                        navController.navigate(item.route) {
-                            // Evita duplicar el mismo destino en el back stack
-                            popUpTo(navController.graph.startDestinationId) {
-                                saveState = true
+                        if (item.route == BottomNavItem.Home.route) {
+                            // Si el botón de inicio está seleccionado, volvemos al `startDestination`
+                            navController.popBackStack(BottomNavItem.Home.route, inclusive = false)
+                        } else {
+                            // Navegación normal
+                            navController.navigate(item.route) {
+                                popUpTo(navController.graph.startDestinationId) {
+                                    saveState = true
+                                }
+                                restoreState = true
+                                launchSingleTop = true
                             }
-                            // Restaura el estado anterior si ya estaba en el back stack
-                            restoreState = true
-                            launchSingleTop = true
                         }
                     }
                 }
