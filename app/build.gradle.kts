@@ -7,12 +7,12 @@ plugins {
 
 android {
     namespace = "com.example.tiratuoferta"
-    compileSdk = 35 // Cambiado de 34 a 35 para resolver los problemas de compatibilidad
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.example.tiratuoferta"
         minSdk = 24
-        targetSdk = 35 // Cambiado de 34 a 35 para mantener la consistencia con compileSdk
+        targetSdk = 35
         versionCode = 1
         versionName = "1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -56,19 +56,23 @@ android {
 }
 
 dependencies {
+    // AndroidX Core
     implementation(libs.androidx.core.ktx)
 
     // Firebase BoM
     implementation(platform("com.google.firebase:firebase-bom:33.4.0"))
     implementation("com.google.firebase:firebase-auth-ktx")
-    implementation("androidx.recyclerview:recyclerview:1.2.1")
     implementation("com.google.firebase:firebase-database-ktx")
     implementation("com.google.firebase:firebase-storage-ktx")
     implementation("com.google.firebase:firebase-messaging:24.0.3")
+    implementation("com.google.firebase:firebase-inappmessaging-display:20.1.0")
+    implementation("com.google.firebase:firebase-firestore-ktx")
+
+    // RecyclerView
+    implementation("androidx.recyclerview:recyclerview:1.2.1")
 
     // Kotlin Parcelize Runtime
     implementation("org.jetbrains.kotlin:kotlin-parcelize-runtime:1.8.0")
-    implementation("com.google.firebase:firebase-inappmessaging-display:20.1.0")
 
     // AndroidX Libraries
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -77,28 +81,43 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
-    implementation("androidx.coordinatorlayout:coordinatorlayout:1.2.0")
     implementation("com.google.android.material:material:1.8.0")
 
-    // Añadir material para Compose (Material 2)
-    implementation("androidx.compose.material:material:1.5.0") // o la versión más reciente
+    // Compose Material (Material 2 actualizado)
+    implementation("androidx.compose.material:material:1.6.0")
 
-    // Glide for Image Loading
+    // Glide (para cargar imágenes)
     implementation("io.coil-kt:coil-compose:2.1.0")
-
     implementation("com.github.bumptech.glide:glide:4.15.1")
-    implementation(libs.firebase.firestore.ktx)
-    implementation(libs.androidx.navigation.compose)
+    implementation(libs.core.ktx)
+    implementation(libs.androidx.espresso.intents)
+    implementation(libs.androidx.ui.test.junit4.android)
+    testImplementation(libs.junit.jupiter)
+    testImplementation(libs.junit.jupiter)
+    testImplementation(libs.junit.jupiter)
     annotationProcessor("com.github.bumptech.glide:compiler:4.15.1")
 
+    // Navigation en Compose
+    implementation(libs.androidx.navigation.compose)
+
     // Testing Libraries
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
-    androidTestImplementation(platform(libs.androidx.compose.bom))
-    androidTestImplementation(libs.androidx.ui.test.junit4)
+    testImplementation("org.junit.jupiter:junit-jupiter:5.9.3")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.9.3")
+    testImplementation("org.mockito:mockito-core:5.6.0")
+
+    // Pruebas Instrumentadas
+    androidTestImplementation("androidx.test.ext:junit:1.1.5")
+    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
+    androidTestImplementation("androidx.compose.ui:ui-test-junit4:1.5.1")
 
     // Debugging Libraries
-    debugImplementation(libs.androidx.ui.tooling)
-    debugImplementation(libs.androidx.ui.test.manifest)
+    debugImplementation("androidx.compose.ui:ui-tooling:1.5.1")
+    debugImplementation("androidx.compose.ui:ui-test-manifest:1.5.1")
+
+    // Kotlin Script Runtime
+    implementation(kotlin("script-runtime"))
+    implementation(kotlin("test"))
+}
+tasks.withType<Test> {
+    useJUnitPlatform() // Necesario para JUnit 5
 }
