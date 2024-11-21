@@ -105,7 +105,8 @@ fun CreateAuctionScreen(navController: NavController, saveAuction: (Auction) -> 
                     startingPrice = startingPrice.toDoubleOrNull() ?: 0.0,
                     minimumIncrease = minimumIncrease.toDoubleOrNull() ?: 0.0,
                     endTime = selectedDate ?: 0L,
-                    userId = "ID_DEL_USUARIO" // Cambia esto por el ID del usuario actual
+                    userId = "ID_DEL_USUARIO",
+                    startTime = System.currentTimeMillis() // Cambia esto por el ID del usuario actual
                 )
                 saveAuction(auction)
                 navController.popBackStack()

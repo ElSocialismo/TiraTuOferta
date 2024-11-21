@@ -95,6 +95,8 @@ dependencies {
     testImplementation(libs.junit.jupiter)
     testImplementation(libs.junit.jupiter)
     testImplementation(libs.junit.jupiter)
+    testImplementation(libs.junit.jupiter)
+    testImplementation(libs.junit.jupiter)
     annotationProcessor("com.github.bumptech.glide:compiler:4.15.1")
 
     // Navigation en Compose

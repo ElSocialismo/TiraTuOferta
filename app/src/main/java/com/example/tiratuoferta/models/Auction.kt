@@ -13,10 +13,11 @@ data class Auction(
     val startingPrice: Double = 0.0,
     val currentBid: Double = 0.0,
     val minimumIncrease: Double = 0.0,
-    val endTime: Long = 0L,
+    var endTime: Long = 0L,
     val userId: String = "",
     val participants: MutableMap<String, Boolean>? = null,
-    var Favorite: Boolean = false
+    var Favorite: Boolean = false,
+    val startTime: Long
 ) : Parcelable
 @Parcelize
 data class Bid(

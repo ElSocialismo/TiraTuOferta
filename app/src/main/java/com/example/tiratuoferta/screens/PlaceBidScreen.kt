@@ -1,6 +1,7 @@
 // PlaceBidScreen.kt
 package com.example.tiratuoferta.screens
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
@@ -30,6 +31,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+@SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
 fun PlaceBidScreen(navController: NavController, auctionId: String) {
     var bidAmount by remember { mutableStateOf("") }

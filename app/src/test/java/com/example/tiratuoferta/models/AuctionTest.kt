@@ -8,7 +8,7 @@ class AuctionModelUnitTest {
 
     @Test
     fun `crear subasta con valores predeterminados`() {
-        val auction = Auction()
+        val auction = Auction(startTime = System.currentTimeMillis())
         assertEquals("", auction.id)
         assertEquals("", auction.title)
         assertEquals("", auction.description)
@@ -35,7 +35,8 @@ class AuctionModelUnitTest {
             endTime = System.currentTimeMillis() + 100000,
             userId = "user123",
             participants = mutableMapOf("user123" to true, "user456" to true),
-            Favorite = true
+            Favorite = true,
+            startTime = System.currentTimeMillis()
         )
 
         assertEquals("1", auction.id)
@@ -57,7 +58,8 @@ class AuctionModelUnitTest {
             title = "Subasta Test",
             startingPrice = 100.0,
             currentBid = 105.0,
-            minimumIncrease = 10.0
+            minimumIncrease = 10.0,
+            startTime = System.currentTimeMillis()
         )
         assertFalse(auction.currentBid - auction.startingPrice >= auction.minimumIncrease)
     }
@@ -66,7 +68,8 @@ class AuctionModelUnitTest {
     fun `validar que la subasta expiro`() {
         val auction = Auction(
             title = "Subasta Test",
-            endTime = System.currentTimeMillis() - 10000 // Fecha pasada
+            endTime = System.currentTimeMillis() - 10000,
+            startTime = System.currentTimeMillis() // Fecha pasada
         )
         assertTrue(auction.endTime < System.currentTimeMillis(), "La subasta ya expiró")
     }
