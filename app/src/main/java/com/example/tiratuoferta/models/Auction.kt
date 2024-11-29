@@ -1,7 +1,7 @@
 package com.example.tiratuoferta.models
 
 import android.os.Parcelable
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 
 @Parcelize
 data class Auction(
@@ -9,15 +9,15 @@ data class Auction(
     val title: String = "",
     val description: String = "",
     val imageUrl: String = "",
-    val category: String = "",
+    val category: String = "", // Esta será la categoría seleccionada por el usuario
     val startingPrice: Double = 0.0,
     val currentBid: Double = 0.0,
     val minimumIncrease: Double = 0.0,
     var endTime: Long = 0L,
     val userId: String = "",
     val participants: MutableMap<String, Boolean>? = null,
-    var Favorite: Boolean = false,
-    val startTime: Long = 0L  // Agregar valor predeterminado para el campo 'startTime'
+    var favorite: Boolean = false,
+    val startTime: Long = 0L
 ) : Parcelable {
     // Constructor vacío para Firebase
     constructor() : this(
@@ -32,7 +32,7 @@ data class Auction(
         endTime = 0L,
         userId = "",
         participants = null,
-        Favorite = false,
+        favorite = false,
         startTime = 0L
     )
 }

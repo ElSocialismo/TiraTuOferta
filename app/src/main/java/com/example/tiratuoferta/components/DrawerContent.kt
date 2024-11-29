@@ -11,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.example.tiratuoferta.activities.BottomNavItem
 
 @Composable
 fun DrawerContent(navController: NavController) {
@@ -22,7 +23,18 @@ fun DrawerContent(navController: NavController) {
         )
         Divider()
 
-        // Navegar a la pantalla de Mis Subastas
+        // Navegar a la pantalla de Home
+        DrawerItem("Ir al Home") {
+            if (navController.currentDestination?.route != BottomNavItem.Home.route) {
+                navController.navigate(BottomNavItem.Home.route) {
+                    // Limpiar la pila de navegación de pantallas anteriores
+                    popUpTo(navController.graph.startDestinationId) { inclusive = true }
+                    launchSingleTop = true
+                }
+            }
+        }
+
+        // Otros elementos de navegación
         DrawerItem("Mis Subastas") {
             navController.navigate("misSubastas") {
                 popUpTo(navController.graph.startDestinationId) { inclusive = true }
@@ -30,7 +42,6 @@ fun DrawerContent(navController: NavController) {
             }
         }
 
-        // Navegar a la pantalla de Contactar
         DrawerItem("Contactar") {
             navController.navigate("contactar") {
                 popUpTo(navController.graph.startDestinationId) { inclusive = true }
@@ -38,7 +49,6 @@ fun DrawerContent(navController: NavController) {
             }
         }
 
-        // Navegar a la pantalla de Idioma
         DrawerItem("Idioma") {
             navController.navigate("idioma") {
                 popUpTo(navController.graph.startDestinationId) { inclusive = true }
@@ -46,7 +56,6 @@ fun DrawerContent(navController: NavController) {
             }
         }
 
-        // Navegar a la pantalla de Ayuda
         DrawerItem("Ayuda") {
             navController.navigate("ayuda") {
                 popUpTo(navController.graph.startDestinationId) { inclusive = true }
@@ -54,7 +63,6 @@ fun DrawerContent(navController: NavController) {
             }
         }
 
-        // Navegar a la pantalla de Cerrar Sesión
         DrawerItem("Cerrar sesión") {
             navController.navigate("cerrarSesion") {
                 popUpTo(navController.graph.startDestinationId) { inclusive = true }
@@ -63,6 +71,7 @@ fun DrawerContent(navController: NavController) {
         }
     }
 }
+
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable

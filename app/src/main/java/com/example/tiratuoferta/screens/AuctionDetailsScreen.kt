@@ -81,11 +81,11 @@ fun AuctionDetailsScreen(navController: NavController, auctionId: String) {
                 Text(text = "Detalles", fontWeight = FontWeight.Bold, fontSize = 20.sp)
                 Spacer(modifier = Modifier.weight(1f))
                 IconButton(onClick = {
-                    it.Favorite = !it.Favorite
-                    auctionRef.child("Favorite").setValue(it.Favorite)
+                    it.favorite = !it.favorite
+                    auctionRef.child("favorite").setValue(it.favorite) //
                 }) {
                     Icon(
-                        painter = painterResource(id = if (it.Favorite) android.R.drawable.star_on else android.R.drawable.star_off),
+                        painter = painterResource(id = if (it.favorite) android.R.drawable.star_on else android.R.drawable.star_off),
                         contentDescription = "Favorite"
                     )
                 }
@@ -154,5 +154,4 @@ fun AuctionDetailsScreen(navController: NavController, auctionId: String) {
         }
     }
 }
-
 
