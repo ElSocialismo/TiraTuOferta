@@ -29,7 +29,7 @@ class BidModelUnitTest {
     @Test
     fun `validar oferta menor al precio actual`() {
         val currentBid = 100.0
-        val bid = Bid(userId = "user123", amount = 90.0)
+        val bid = Bid(userId =  "user123", amount = 90.0)
 
         assertTrue(bid.amount < currentBid, "La oferta no puede ser menor al precio actual")
     }

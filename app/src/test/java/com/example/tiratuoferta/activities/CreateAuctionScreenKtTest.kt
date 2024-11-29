@@ -115,7 +115,7 @@ class CreateAuctionUnitTest {
         val result = validateAuction(
             title = "Subasta",
             description = "Descripción válida",
-            startingPrice = "10",
+            startingPrice = "",
             minimumIncrease = "1",
             imageUrl = "https://image.url",
             endTime = System.currentTimeMillis() - 100000 // Fecha pasada
