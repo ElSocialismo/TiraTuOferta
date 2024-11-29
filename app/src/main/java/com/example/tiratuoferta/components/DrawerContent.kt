@@ -23,6 +23,8 @@ fun DrawerContent(navController: NavController) {
         )
         Divider()
 
+
+
         // Navegar a la pantalla de Home
         DrawerItem("Ir al Home") {
             if (navController.currentDestination?.route != BottomNavItem.Home.route) {
