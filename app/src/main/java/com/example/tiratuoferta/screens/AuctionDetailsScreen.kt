@@ -1,4 +1,3 @@
-// AuctionDetailsScreen.kt
 package com.example.tiratuoferta.screens
 
 import androidx.compose.foundation.Image
@@ -17,9 +16,9 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
 import com.example.tiratuoferta.models.Auction
-import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import kotlinx.coroutines.delay
 import java.util.concurrent.TimeUnit
@@ -81,8 +80,18 @@ fun AuctionDetailsScreen(navController: NavController, auctionId: String) {
                 Text(text = "Detalles", fontWeight = FontWeight.Bold, fontSize = 20.sp)
                 Spacer(modifier = Modifier.weight(1f))
                 IconButton(onClick = {
-                    it.favorite = !it.favorite
-                    auctionRef.child("favorite").setValue(it.favorite) //
+                    // Marcar o desmarcar como favorito
+                    val updatedAuction = it.copy(favorite = !it.favorite)
+                    auctionRef.child("favorite").setValue(updatedAuction.favorite)
+
+                    // Agregar o quitar de la lista de favoritos del usuario
+                    val userId = "user123"  // Este debe ser el ID del usuario actual
+                    val favoritesRef = FirebaseDatabase.getInstance().getReference("users/$userId/favorites")
+                    if (updatedAuction.favorite) {
+                        favoritesRef.child(auctionId).setValue(true)  // Agregar a favoritos
+                    } else {
+                        favoritesRef.child(auctionId).removeValue()  // Eliminar de favoritos
+                    }
                 }) {
                     Icon(
                         painter = painterResource(id = if (it.favorite) android.R.drawable.star_on else android.R.drawable.star_off),
@@ -154,4 +163,3 @@ fun AuctionDetailsScreen(navController: NavController, auctionId: String) {
         }
     }
 }
-

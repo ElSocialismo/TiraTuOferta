@@ -23,18 +23,19 @@ import com.example.tiratuoferta.models.Auction
 import com.example.tiratuoferta.screens.*
 import com.example.tiratuoferta.ui.theme.TiraTuOfertaTheme
 import com.google.firebase.database.FirebaseDatabase
-import kotlinx.coroutines.launch
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.DatabaseReference
+import kotlinx.coroutines.launch
 
 class HomeActivity : ComponentActivity() {
     private lateinit var auth: FirebaseAuth
-    private lateinit var database: DatabaseReference
+    private lateinit var database: FirebaseDatabase
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Inicialización de Firebase
         auth = FirebaseAuth.getInstance()
-        database = FirebaseDatabase.getInstance().getReference("auctions")
+        database = FirebaseDatabase.getInstance()
 
         setContent {
             TiraTuOfertaTheme {
@@ -51,6 +52,7 @@ class HomeActivity : ComponentActivity() {
     private fun checkAuthenticationStatus() {
         val currentUser = auth.currentUser
         if (currentUser == null) {
+            // Si el usuario no está autenticado, lo redirigimos al LoginActivity
             startActivity(Intent(this, LoginActivity::class.java))
             finish()
         }
@@ -93,15 +95,17 @@ fun MainScreen() {
                 }
             }
         ) { innerPadding ->
+            // Configuración del NavHost con rutas definidas
             NavHost(
                 navController = navController,
                 startDestination = BottomNavItem.Home.route,
-                Modifier.padding(innerPadding)
+                modifier = Modifier.padding(innerPadding)
             ) {
                 composable(BottomNavItem.Home.route) { AuctionList(navController) }
                 composable(BottomNavItem.Categories.route) { CategoriesScreen() }
-                composable(BottomNavItem.Favorites.route) { FavoritesScreen() }
+                composable(BottomNavItem.Favorites.route) { FavoritesScreen(navController) }
                 composable(BottomNavItem.Profile.route) { ProfileScreen() }
+
                 composable("createAuction") {
                     CreateAuctionScreen(navController = navController, saveAuction = { auction ->
                         saveAuctionToFirebase(auction)
@@ -137,12 +141,13 @@ fun MainScreen() {
 }
 
 fun saveAuctionToFirebase(auction: Auction) {
-    val database = FirebaseDatabase.getInstance().getReference("auctions")
-    database.child(auction.id).setValue(auction)
+    val auctionsRef = FirebaseDatabase.getInstance().getReference("auctions")
+    auctionsRef.child(auction.id).setValue(auction)
         .addOnSuccessListener {
-            // Éxito
+            // Mensaje de éxito, puedes añadir lógica adicional si es necesario
         }
         .addOnFailureListener { e ->
-            // Manejo de errores
+            // Manejo de errores, puedes añadir un mensaje de error o lógica adicional
+            e.printStackTrace()
         }
 }
