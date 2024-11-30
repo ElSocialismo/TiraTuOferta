@@ -30,14 +30,13 @@ fun BottomNavBar(navController: NavController) {
                 label = { Text(item.title) },
                 selected = currentRoute == item.route,
                 onClick = {
-                    // No hacemos nada si estamos en la misma pantalla
+                    // Si estamos en la misma pantalla, no hacemos nada
                     if (currentRoute != item.route) {
+                        // Si no estamos en la ruta, navegar y limpiar la pila de pantallas anteriores
                         navController.navigate(item.route) {
-                            // Si no estamos en la ruta, navegar y limpiar las pantallas previas
-                            popUpTo(navController.graph.startDestinationId) {
-                                saveState = true
-                            }
-                            restoreState = true
+                            // Limpiar la pila de navegación hacia la pantalla de inicio
+                            popUpTo(navController.graph.startDestinationId) { inclusive = true }
+                            // Evitar duplicación de la ruta
                             launchSingleTop = true
                         }
                     }

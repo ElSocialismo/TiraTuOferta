@@ -85,7 +85,9 @@ fun MainScreen() {
                     elevation = 12.dp
                 )
             },
-            bottomBar = { BottomNavBar(navController) },
+            bottomBar = {
+                BottomNavBar(navController) // Aquí pasa el navController al BottomNavBar
+            },
             floatingActionButton = {
                 FloatingActionButton(
                     onClick = { navController.navigate("createAuction") },
@@ -95,17 +97,20 @@ fun MainScreen() {
                 }
             }
         ) { innerPadding ->
-            // Configuración del NavHost con rutas definidas
             NavHost(
                 navController = navController,
                 startDestination = BottomNavItem.Home.route,
                 modifier = Modifier.padding(innerPadding)
             ) {
                 composable(BottomNavItem.Home.route) { AuctionList(navController) }
-                composable(BottomNavItem.Categories.route) { CategoriesScreen() }
+
+                // Categorías
+                composable(BottomNavItem.Categories.route) { CategoriesScreen(navController) }
+
                 composable(BottomNavItem.Favorites.route) { FavoritesScreen(navController) }
                 composable(BottomNavItem.Profile.route) { ProfileScreen() }
 
+                // Pantallas adicionales
                 composable("createAuction") {
                     CreateAuctionScreen(navController = navController, saveAuction = { auction ->
                         saveAuctionToFirebase(auction)
@@ -120,25 +125,23 @@ fun MainScreen() {
                     PlaceBidScreen(navController = navController, auctionId = auctionId)
                 }
 
-                composable("misSubastas") {
-                    MisSubastasScreen()
+                composable("categoryAuctionList/{category}") { backStackEntry ->
+                    val category = backStackEntry.arguments?.getString("category") ?: ""
+                    CategoryAuctionListScreen(navController = navController, category = category)
                 }
-                composable("contactar") {
-                    ContactarScreen()
-                }
-                composable("idioma") {
-                    IdiomaScreen()
-                }
-                composable("ayuda") {
-                    AyudaScreen()
-                }
-                composable("cerrarSesion") {
-                    CerrarSesionScreen()
-                }
+
+                // Otras pantallas
+                composable("misSubastas") { MisSubastasScreen() }
+                composable("contactar") { ContactarScreen() }
+                composable("idioma") { IdiomaScreen() }
+                composable("ayuda") { AyudaScreen() }
+                composable("cerrarSesion") { CerrarSesionScreen() }
             }
         }
     }
 }
+
+
 
 fun saveAuctionToFirebase(auction: Auction) {
     val auctionsRef = FirebaseDatabase.getInstance().getReference("auctions")

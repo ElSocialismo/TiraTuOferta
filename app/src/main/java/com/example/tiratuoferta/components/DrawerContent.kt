@@ -23,57 +23,52 @@ fun DrawerContent(navController: NavController) {
         )
         Divider()
 
-
-
         // Navegar a la pantalla de Home
         DrawerItem("Ir al Home") {
-            if (navController.currentDestination?.route != BottomNavItem.Home.route) {
-                navController.navigate(BottomNavItem.Home.route) {
-                    // Limpiar la pila de navegación de pantallas anteriores
-                    popUpTo(navController.graph.startDestinationId) { inclusive = true }
-                    launchSingleTop = true
-                }
+            // Limpiar la pila y navegar a Home
+            navController.navigate(BottomNavItem.Home.route) {
+                popUpTo(BottomNavItem.Home.route) { inclusive = true }
+                launchSingleTop = true
             }
         }
 
         // Otros elementos de navegación
         DrawerItem("Mis Subastas") {
             navController.navigate("misSubastas") {
-                popUpTo(navController.graph.startDestinationId) { inclusive = true }
+                popUpTo(BottomNavItem.Home.route) { inclusive = true }
                 launchSingleTop = true
             }
         }
 
         DrawerItem("Contactar") {
             navController.navigate("contactar") {
-                popUpTo(navController.graph.startDestinationId) { inclusive = true }
+                popUpTo(BottomNavItem.Home.route) { inclusive = true }
                 launchSingleTop = true
             }
         }
 
         DrawerItem("Idioma") {
             navController.navigate("idioma") {
-                popUpTo(navController.graph.startDestinationId) { inclusive = true }
+                popUpTo(BottomNavItem.Home.route) { inclusive = true }
                 launchSingleTop = true
             }
         }
 
         DrawerItem("Ayuda") {
             navController.navigate("ayuda") {
-                popUpTo(navController.graph.startDestinationId) { inclusive = true }
+                popUpTo(BottomNavItem.Home.route) { inclusive = true }
                 launchSingleTop = true
             }
         }
 
         DrawerItem("Cerrar sesión") {
             navController.navigate("cerrarSesion") {
-                popUpTo(navController.graph.startDestinationId) { inclusive = true }
+                popUpTo(BottomNavItem.Home.route) { inclusive = true }
                 launchSingleTop = true
             }
         }
     }
 }
-
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -83,5 +78,3 @@ fun DrawerItem(text: String, onClick: () -> Unit) {
         text = { Text(text) }
     )
 }
-
-
