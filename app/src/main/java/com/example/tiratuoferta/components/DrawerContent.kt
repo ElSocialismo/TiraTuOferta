@@ -47,13 +47,6 @@ fun DrawerContent(navController: NavController) {
             }
         }
 
-        DrawerItem("Idioma") {
-            navController.navigate("idioma") {
-                popUpTo(BottomNavItem.Home.route) { inclusive = true }
-                launchSingleTop = true
-            }
-        }
-
         DrawerItem("Ayuda") {
             navController.navigate("ayuda") {
                 popUpTo(BottomNavItem.Home.route) { inclusive = true }
