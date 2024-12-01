@@ -72,7 +72,7 @@ fun AuctionItem(auction: Auction, navController: NavController) {
                 .padding(8.dp)
         )
         Text(text = auction.title, maxLines = 1)
-        Text(text = "Ends on: $endDate")
+        Text(text = "Termina en: $endDate")
         Button(onClick = { navController.navigate("auctionDetails/${auction.id}") }) {
             Text("VER SUBASTA")
         }
