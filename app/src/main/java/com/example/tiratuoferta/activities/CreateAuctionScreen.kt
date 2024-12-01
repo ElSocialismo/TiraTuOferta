@@ -23,6 +23,8 @@ import android.app.DatePickerDialog
     import java.util.*
     import androidx.activity.compose.rememberLauncherForActivityResult
     import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
     import java.text.SimpleDateFormat
@@ -39,9 +41,9 @@ fun CreateAuctionScreen(navController: NavController, saveAuction: (Auction) -> 
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
     var selectedCategory by remember { mutableStateOf<String?>(null) }
 
-    val context = LocalContext.current // Obtener el contexto aquí
-    val auth = FirebaseAuth.getInstance() // Obtener la instancia de FirebaseAuth
-    val currentUser = auth.currentUser // Usuario actual autenticado
+    val context = LocalContext.current
+    val auth = FirebaseAuth.getInstance()
+    val currentUser = auth.currentUser
 
     // Lista de categorías predefinidas
     val categories = listOf("Electrónica", "Ropa", "Juguetes", "Automóviles", "Hogar")
@@ -50,9 +52,7 @@ fun CreateAuctionScreen(navController: NavController, saveAuction: (Auction) -> 
     val imagePickerLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         uri?.let {
             selectedImageUri = it
-            uploadImageToFirebase(it) { downloadUrl ->
-                imageUrl = downloadUrl
-            }
+            uploadImageToFirebase(it) { downloadUrl -> imageUrl = downloadUrl }
         }
     }
 
@@ -62,119 +62,161 @@ fun CreateAuctionScreen(navController: NavController, saveAuction: (Auction) -> 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+            .padding(16.dp)
+            .verticalScroll(rememberScrollState()),  // Agregar scroll vertical
+        verticalArrangement = Arrangement.spacedBy(20.dp)
     ) {
-        // Campo Título
-        TextField(
-            value = title,
-            onValueChange = { title = it },
-            label = { Text("Título de la subasta") }
-        )
-
-        // Campo Descripción
-        TextField(
-            value = description,
-            onValueChange = { description = it },
-            label = { Text("Descripción") }
-        )
-
-        // Campo Precio inicial
-        TextField(
-            value = startingPrice,
-            onValueChange = { startingPrice = it },
-            label = { Text("Precio inicial") },
-            keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number)
-        )
-
-        // Campo Incremento mínimo
-        TextField(
-            value = minimumIncrease,
-            onValueChange = { minimumIncrease = it },
-            label = { Text("Incremento mínimo") },
-            keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number)
-        )
-
-        // Dropdown para seleccionar la categoría
-        TextField(
-            value = selectedCategory ?: "Seleccionar Categoría",
-            onValueChange = {},
-            label = { Text("Categoría") },
-            readOnly = true,
-            trailingIcon = {
-                IconButton(onClick = { expanded = !expanded }) {
-                    Icon(imageVector = Icons.Default.ArrowDropDown, contentDescription = "Expandir categorías")
-                }
-            }
-        )
-
-        // Mostrar el DropdownMenu de categorías
-        DropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false }
-        ) {
-            categories.forEach { category ->
-                DropdownMenuItem(onClick = {
-                    selectedCategory = category
-                    expanded = false
-                }) {
-                    Text(text = category)
-                }
-            }
+        // Título y Descripción: Grupo de Información General
+        Section(title = "Información General") {
+            // Título
+            OutlinedTextField(
+                value = title,
+                onValueChange = { title = it },
+                label = { Text("Título de la subasta") },
+                modifier = Modifier.fillMaxWidth(),
+                shape = MaterialTheme.shapes.medium
+            )
+            // Descripción
+            OutlinedTextField(
+                value = description,
+                onValueChange = { description = it },
+                label = { Text("Descripción") },
+                modifier = Modifier.fillMaxWidth(),
+                shape = MaterialTheme.shapes.medium
+            )
         }
 
-        // Botón para subir imagen
-        Button(onClick = { imagePickerLauncher.launch("image/*") }) {
-            Text("Subir Imagen")
+        // Precio y Incremento: Grupo de Precios
+        Section(title = "Precios") {
+            // Precio inicial
+            OutlinedTextField(
+                value = startingPrice,
+                onValueChange = { startingPrice = it },
+                label = { Text("Precio inicial") },
+                modifier = Modifier.fillMaxWidth(),
+                keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
+                shape = MaterialTheme.shapes.medium
+            )
+            // Incremento mínimo
+            OutlinedTextField(
+                value = minimumIncrease,
+                onValueChange = { minimumIncrease = it },
+                label = { Text("Incremento mínimo") },
+                modifier = Modifier.fillMaxWidth(),
+                keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
+                shape = MaterialTheme.shapes.medium
+            )
         }
 
-        selectedImageUri?.let {
-            Text(text = "Imagen seleccionada")
-        }
-
-        // Botón para seleccionar fecha y hora
-        Button(onClick = { showDateTimePicker(context) { dateInMillis -> selectedDate = dateInMillis } }) {
-            Text("Seleccionar fecha de finalización")
-        }
-
-        selectedDate?.let {
-            Text(text = "Fecha seleccionada: ${SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()).format(it)}")
-        }
-
-        // Botón para crear la subasta
-        Button(
-            onClick = {
-                // Verificar si la imagen está disponible antes de guardar la subasta
-                if (imageUrl != null && currentUser != null) {
-                    val auction = Auction(
-                        id = UUID.randomUUID().toString(),
-                        title = title,
-                        description = description,
-                        imageUrl = imageUrl ?: "",
-                        startingPrice = startingPrice.toDoubleOrNull() ?: 0.0,
-                        minimumIncrease = minimumIncrease.toDoubleOrNull() ?: 0.0,
-                        endTime = selectedDate ?: 0L,
-                        userId = currentUser.uid, // Aquí usamos el uid del usuario autenticado
-                        startTime = System.currentTimeMillis(),
-                        category = selectedCategory ?: ""
-                    )
-
-                    saveAuction(auction)
-
-                    // Navegar a la pantalla principal
-                    navController.navigate("home") {
-                        popUpTo("home") { inclusive = true }
+        // Categoría
+        Section(title = "Categoría") {
+            OutlinedTextField(
+                value = selectedCategory ?: "Seleccionar Categoría",
+                onValueChange = {},
+                label = { Text("Categoría") },
+                modifier = Modifier.fillMaxWidth(),
+                readOnly = true,
+                trailingIcon = {
+                    IconButton(onClick = { expanded = !expanded }) {
+                        Icon(imageVector = Icons.Default.ArrowDropDown, contentDescription = "Expandir categorías")
                     }
-                } else {
-                    // Mostrar un mensaje indicando que se debe seleccionar una imagen primero o que no hay usuario autenticado
-                    Log.d("CreateAuction", "No se ha seleccionado una imagen o el usuario no está autenticado.")
+                },
+                shape = MaterialTheme.shapes.medium
+            )
+            DropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false }
+            ) {
+                categories.forEach { category ->
+                    DropdownMenuItem(onClick = {
+                        selectedCategory = category
+                        expanded = false
+                    }) {
+                        Text(text = category)
+                    }
                 }
             }
-        ) {
-            Text("Crear Subasta")
+        }
+
+        // Imagen
+        Section(title = "Imagen") {
+            Button(
+                onClick = { imagePickerLauncher.launch("image/*") },
+                modifier = Modifier.fillMaxWidth(),
+                shape = MaterialTheme.shapes.medium,
+                colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.primary)
+            ) {
+                Text("Subir Imagen", color = Color.White)
+            }
+            selectedImageUri?.let {
+                Text(text = "Imagen seleccionada", color = Color.Gray, modifier = Modifier.padding(top = 8.dp))
+            }
+        }
+
+        // Fecha y Hora
+        Section(title = "Fecha de finalización") {
+            Button(
+                onClick = { showDateTimePicker(context) { dateInMillis -> selectedDate = dateInMillis } },
+                modifier = Modifier.fillMaxWidth(),
+                shape = MaterialTheme.shapes.medium,
+                colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.primary)
+            ) {
+                Text("Seleccionar fecha", color = Color.White)
+            }
+            selectedDate?.let {
+                Text(text = "Fecha seleccionada: ${SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()).format(it)}")
+            }
+        }
+
+        // Botón de creación de subasta
+        Section(title = "") {
+            Button(
+                onClick = {
+                    if (imageUrl != null && currentUser != null) {
+                        val auction = Auction(
+                            id = UUID.randomUUID().toString(),
+                            title = title,
+                            description = description,
+                            imageUrl = imageUrl ?: "",
+                            startingPrice = startingPrice.toDoubleOrNull() ?: 0.0,
+                            minimumIncrease = minimumIncrease.toDoubleOrNull() ?: 0.0,
+                            endTime = selectedDate ?: 0L,
+                            userId = currentUser.uid,
+                            startTime = System.currentTimeMillis(),
+                            category = selectedCategory ?: ""
+                        )
+                        saveAuction(auction)
+                        navController.navigate("home") {
+                            popUpTo("home") { inclusive = true }
+                        }
+                    } else {
+                        Log.d("CreateAuction", "No se ha seleccionado una imagen o el usuario no está autenticado.")
+                    }
+                },
+                modifier = Modifier.fillMaxWidth(),
+                shape = MaterialTheme.shapes.medium,
+                colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.secondary)
+            ) {
+                Text("Crear Subasta", color = Color.White)
+            }
         }
     }
 }
+
+@Composable
+fun Section(title: String, content: @Composable () -> Unit) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        if (title.isNotBlank()) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.h6,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+        }
+        content()
+    }
+}
+
 
 // Función para subir la imagen a Firebase Storage y obtener la URL de descarga
 fun uploadImageToFirebase(uri: Uri, onSuccess: (String) -> Unit) {
