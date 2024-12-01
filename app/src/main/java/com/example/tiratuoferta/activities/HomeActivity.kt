@@ -26,6 +26,8 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
 
+
+
 class HomeActivity : ComponentActivity() {
     private lateinit var auth: FirebaseAuth
     private lateinit var database: FirebaseDatabase

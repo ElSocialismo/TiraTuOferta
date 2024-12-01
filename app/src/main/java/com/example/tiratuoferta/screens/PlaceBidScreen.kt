@@ -121,19 +121,23 @@ fun PlaceBidScreen(navController: NavController, auctionId: String) {
                         errorMessage = "La puja debe ser mayor a la puja actual de ${currentBid}$"
                     } else {
                         val newBid = Bid(userId = userId, amount = amount)
-                        bidsDatabase.push().setValue(newBid) // Guardamos la puja en Firebase
 
-                        // Actualizar el `currentBid` en el nodo principal de la subasta
+                        // Guardar la nueva puja en Firebase bajo la subasta correspondiente
+                        bidsDatabase.push().setValue(newBid)
+
+                        // Actualizar el currentBid en el nodo principal de la subasta
                         auctionRef.child("currentBid").setValue(amount)
 
-                        bidAmount = "" // Limpiamos el campo después de la puja
-                        errorMessage = "" // Limpiamos el mensaje de error
+                        // Limpiar el campo después de la puja
+                        bidAmount = ""
+                        errorMessage = ""
                     }
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Confirmar Puja")
             }
+
 
             Spacer(modifier = Modifier.height(16.dp))
 

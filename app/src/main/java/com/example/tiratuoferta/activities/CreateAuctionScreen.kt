@@ -23,7 +23,8 @@ import android.app.DatePickerDialog
     import java.util.*
     import androidx.activity.compose.rememberLauncherForActivityResult
     import androidx.activity.result.contract.ActivityResultContracts
-    import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.FirebaseDatabase
     import java.text.SimpleDateFormat
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -39,6 +40,8 @@ fun CreateAuctionScreen(navController: NavController, saveAuction: (Auction) -> 
     var selectedCategory by remember { mutableStateOf<String?>(null) }
 
     val context = LocalContext.current // Obtener el contexto aquí
+    val auth = FirebaseAuth.getInstance() // Obtener la instancia de FirebaseAuth
+    val currentUser = auth.currentUser // Usuario actual autenticado
 
     // Lista de categorías predefinidas
     val categories = listOf("Electrónica", "Ropa", "Juguetes", "Automóviles", "Hogar")
@@ -142,7 +145,7 @@ fun CreateAuctionScreen(navController: NavController, saveAuction: (Auction) -> 
         Button(
             onClick = {
                 // Verificar si la imagen está disponible antes de guardar la subasta
-                if (imageUrl != null) {
+                if (imageUrl != null && currentUser != null) {
                     val auction = Auction(
                         id = UUID.randomUUID().toString(),
                         title = title,
@@ -151,7 +154,7 @@ fun CreateAuctionScreen(navController: NavController, saveAuction: (Auction) -> 
                         startingPrice = startingPrice.toDoubleOrNull() ?: 0.0,
                         minimumIncrease = minimumIncrease.toDoubleOrNull() ?: 0.0,
                         endTime = selectedDate ?: 0L,
-                        userId = "ID_DEL_USUARIO", // Aquí puedes reemplazar por el ID del usuario
+                        userId = currentUser.uid, // Aquí usamos el uid del usuario autenticado
                         startTime = System.currentTimeMillis(),
                         category = selectedCategory ?: ""
                     )
@@ -163,8 +166,8 @@ fun CreateAuctionScreen(navController: NavController, saveAuction: (Auction) -> 
                         popUpTo("home") { inclusive = true }
                     }
                 } else {
-                    // Mostrar un mensaje indicando que se debe seleccionar una imagen primero
-                    Log.d("CreateAuction", "No se ha seleccionado una imagen")
+                    // Mostrar un mensaje indicando que se debe seleccionar una imagen primero o que no hay usuario autenticado
+                    Log.d("CreateAuction", "No se ha seleccionado una imagen o el usuario no está autenticado.")
                 }
             }
         ) {
