@@ -66,7 +66,7 @@ fun CreateAuctionScreen(navController: NavController, saveAuction: (Auction) -> 
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
-            .verticalScroll(rememberScrollState()),  // Agregar scroll vertical
+            .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(20.dp)
     ) {
         // Título y Descripción: Grupo de Información General
@@ -147,7 +147,7 @@ fun CreateAuctionScreen(navController: NavController, saveAuction: (Auction) -> 
                 onClick = { imagePickerLauncher.launch("image/*") },
                 modifier = Modifier.fillMaxWidth(),
                 shape = MaterialTheme.shapes.medium,
-                colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.primary)
+                colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF00695C)) // Verde petróleo
             ) {
                 Text("Subir Imagen", color = Color.White)
             }
@@ -162,7 +162,7 @@ fun CreateAuctionScreen(navController: NavController, saveAuction: (Auction) -> 
                 onClick = { showDateTimePicker(context) { dateInMillis -> selectedDate = dateInMillis } },
                 modifier = Modifier.fillMaxWidth(),
                 shape = MaterialTheme.shapes.medium,
-                colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.primary)
+                colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF00695C)) // Verde petróleo
             ) {
                 Text("Seleccionar fecha", color = Color.White)
             }
@@ -222,7 +222,7 @@ fun CreateAuctionScreen(navController: NavController, saveAuction: (Auction) -> 
                 },
                 modifier = Modifier.fillMaxWidth(),
                 shape = MaterialTheme.shapes.medium,
-                colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.secondary)
+                colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFFFF7043)) // Naranja coral
             ) {
                 Text("Crear Subasta", color = Color.White)
             }
@@ -258,26 +258,40 @@ fun uploadImageToFirebase(uri: Uri, onSuccess: (String) -> Unit) {
     storageRef.putFile(uri)
         .addOnSuccessListener {
             storageRef.downloadUrl.addOnSuccessListener { downloadUrl ->
-                // Llamar onSuccess con la URL de la imagen
                 onSuccess(downloadUrl.toString())
             }
         }
-        .addOnFailureListener {
-            Log.d("UploadImage", "Error al subir la imagen: ${it.message}")
+        .addOnFailureListener { exception ->
+            Log.e("UploadImage", "Error uploading image", exception)
         }
 }
 
 fun showDateTimePicker(context: Context, onDateTimeSelected: (Long) -> Unit) {
     val calendar = Calendar.getInstance()
-    DatePickerDialog(context, { _, year, month, day ->
-        calendar.set(Calendar.YEAR, year)
-        calendar.set(Calendar.MONTH, month)
-        calendar.set(Calendar.DAY_OF_MONTH, day)
-
-        TimePickerDialog(context, { _, hour, minute ->
-            calendar.set(Calendar.HOUR_OF_DAY, hour)
-            calendar.set(Calendar.MINUTE, minute)
-            onDateTimeSelected(calendar.timeInMillis)
-        }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), true).show()
-    }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)).show()
+    val datePickerDialog = DatePickerDialog(
+        context,
+        { _, year, month, dayOfMonth ->
+            val timePickerDialog = TimePickerDialog(
+                context,
+                { _, hour, minute ->
+                    val date = Calendar.getInstance().apply {
+                        set(Calendar.YEAR, year)
+                        set(Calendar.MONTH, month)
+                        set(Calendar.DAY_OF_MONTH, dayOfMonth)
+                        set(Calendar.HOUR_OF_DAY, hour)
+                        set(Calendar.MINUTE, minute)
+                    }
+                    onDateTimeSelected(date.timeInMillis)
+                },
+                calendar.get(Calendar.HOUR_OF_DAY),
+                calendar.get(Calendar.MINUTE),
+                true
+            )
+            timePickerDialog.show()
+        },
+        calendar.get(Calendar.YEAR),
+        calendar.get(Calendar.MONTH),
+        calendar.get(Calendar.DAY_OF_MONTH)
+    )
+    datePickerDialog.show()
 }

@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.tiratuoferta.activities.BottomNavItem
@@ -19,13 +20,14 @@ fun DrawerContent(navController: NavController, drawerState: DrawerState) {
     val scope = rememberCoroutineScope()
     var showLogoutDialog by remember { mutableStateOf(false) }
 
-    Column {
+    Column (
+        modifier = Modifier.padding(16.dp)
+    ) {
         Text(
             text = "Menú de Navegación",
-            modifier = Modifier.padding(16.dp),
-            style = MaterialTheme.typography.h6
+            style = MaterialTheme.typography.h6.copy(color = Color(0xFF37474F)) // Negro carbón
         )
-        Divider()
+        Divider(color = Color(0xFF37474F)) // Negro carbón
 
         // Ir al Home
         DrawerItem("Ir al Home") {
@@ -105,7 +107,12 @@ fun DrawerContent(navController: NavController, drawerState: DrawerState) {
 fun DrawerItem(text: String, onClick: () -> Unit) {
     ListItem(
         modifier = Modifier.clickable(onClick = onClick),
-        text = { Text(text) }
+        text = {
+            Text(
+                text = text,
+                style = MaterialTheme.typography.body1.copy(color = Color(0xFF37474F)) // Negro carbón
+            )
+        }
     )
 }
 
@@ -117,12 +124,12 @@ fun LogoutDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
         text = { Text(text = "¿Estás seguro de que deseas cerrar sesión?") },
         confirmButton = {
             TextButton(onClick = onConfirm) {
-                Text(text = "Confirmar", color = MaterialTheme.colors.error)
+                Text(text = "Confirmar", color = Color(0xFF00695C)) // Verde petróleo
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text(text = "Cancelar")
+                Text(text = "Cancelar", color = Color(0xFF37474F)) // Negro carbón
             }
         }
     )
