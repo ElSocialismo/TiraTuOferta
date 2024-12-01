@@ -3,6 +3,7 @@ package com.example.tiratuoferta.activities
 import FavoritesScreen
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
@@ -26,8 +27,6 @@ import com.example.tiratuoferta.ui.theme.TiraTuOfertaTheme
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
-
-
 
 class HomeActivity : ComponentActivity() {
     private lateinit var auth: FirebaseAuth
@@ -116,11 +115,20 @@ fun MainScreen() {
                 }
                 composable("auctionDetails/{auctionId}") { backStackEntry ->
                     val auctionId = backStackEntry.arguments?.getString("auctionId") ?: ""
-                    AuctionDetailsScreen(navController = navController, auctionId = auctionId)
+                    if (auctionId.isNotEmpty()) {
+                        AuctionDetailsScreen(navController = navController, auctionId = auctionId)
+                    } else {
+                        // Manejo de caso si auctionId está vacío
+                        Log.e("Navigation", "Auction ID vacío")
+                    }
                 }
                 composable("placeBid/{auctionId}") { backStackEntry ->
                     val auctionId = backStackEntry.arguments?.getString("auctionId") ?: ""
-                    PlaceBidScreen(navController = navController, auctionId = auctionId)
+                    if (auctionId.isNotEmpty()) {
+                        PlaceBidScreen(navController = navController, auctionId = auctionId)
+                    } else {
+                        Log.e("Navigation", "Auction ID vacío")
+                    }
                 }
 
                 composable("categoryAuctionList/{category}") { backStackEntry ->
@@ -128,10 +136,14 @@ fun MainScreen() {
                     CategoryAuctionListScreen(navController = navController, category = category)
                 }
 
-                // Agregar esta ruta
+                // Ruta para editar subastas
                 composable("editAuction/{auctionId}") { backStackEntry ->
                     val auctionId = backStackEntry.arguments?.getString("auctionId") ?: ""
-                    EditAuctionScreen(navController = navController, auctionId = auctionId)
+                    if (auctionId.isNotEmpty()) {
+                        EditAuctionScreen(navController = navController, auctionId = auctionId)
+                    } else {
+                        Log.e("Navigation", "Auction ID vacío")
+                    }
                 }
 
                 // Otras pantallas
@@ -143,18 +155,23 @@ fun MainScreen() {
     }
 }
 
-
-
-
-
 fun saveAuctionToFirebase(auction: Auction) {
+    // Verificar que auction.id no sea nulo o vacío
+    val auctionId = auction.id ?: generateAuctionId() // Si id es nulo, generamos uno nuevo
+
     val auctionsRef = FirebaseDatabase.getInstance().getReference("auctions")
-    auctionsRef.child(auction.id).setValue(auction)
+    auctionsRef.child(auctionId).setValue(auction)
         .addOnSuccessListener {
-            // Mensaje de éxito, puedes añadir lógica adicional si es necesario
+            // Mensaje de éxito
+            Log.d("Firebase", "Subasta guardada correctamente.")
         }
         .addOnFailureListener { e ->
-            // Manejo de errores, puedes añadir un mensaje de error o lógica adicional
-            e.printStackTrace()
+            // Manejo de errores
+            Log.e("Firebase", "Error al guardar subasta: ", e)
         }
+}
+
+// Función para generar un ID único para la subasta
+fun generateAuctionId(): String {
+    return "auction_${System.currentTimeMillis()}"
 }

@@ -1,6 +1,7 @@
 package com.example.tiratuoferta.activities
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
@@ -16,7 +17,6 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import com.example.tiratuoferta.R
 import com.example.tiratuoferta.models.Auction
 import com.example.tiratuoferta.screens.AuctionItem
@@ -30,11 +30,11 @@ data class Category(val name: String, val icon: Painter, val route: String)
 fun CategoriesScreen(navController: NavController) {
     // Lista de categorías con imágenes
     val categories = listOf(
-        Category("Electrónica", painterResource(id = R.drawable.electronic_icon), "Electronica"),
+        Category("Electronica", painterResource(id = R.drawable.electronic_icon), "Electronica"),
         Category("Ropa", painterResource(id = R.drawable.clothing_icon), "Ropa"),
         Category("Juguetes", painterResource(id = R.drawable.toys_icon), "Juguetes"),
-        Category("Automóviles", painterResource(id = R.drawable.automobile_icon), "Automoviles"),
-        Category("Hogar", painterResource(id = R.drawable.home_icon), "Casa")
+        Category("Automoviles", painterResource(id = R.drawable.automobile_icon), "Automoviles"),
+        Category("Hogar", painterResource(id = R.drawable.home_icon), "Hogar")
     )
 
     // UI de la pantalla de Categorías
@@ -80,7 +80,6 @@ fun CategoryCard(category: Category, navController: NavController) {
     }
 }
 
-// Función para cargar las subastas por categoría
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CategoryAuctionListScreen(navController: NavController, category: String) {
@@ -89,9 +88,11 @@ fun CategoryAuctionListScreen(navController: NavController, category: String) {
 
     // Simulamos la carga de subastas
     LaunchedEffect(category) {
+        Log.d("CategoryFilter", "Buscando subastas con categoría: $category") // Log para depuración
         getAuctionsByCategory(category) { filteredAuctions ->
             auctions.clear()
             auctions.addAll(filteredAuctions)
+            Log.d("CategoryFilter", "Subastas obtenidas: ${filteredAuctions.size}") // Log para ver cuántas subastas se recuperaron
         }
     }
 
@@ -120,10 +121,15 @@ fun CategoryAuctionListScreen(navController: NavController, category: String) {
 
 // Función para obtener subastas filtradas por categoría desde Firebase
 suspend fun getAuctionsByCategory(category: String, onComplete: (List<Auction>) -> Unit) {
+    Log.d("CategoryFilter", "Consultando subastas para la categoría: $category")  // Log para ver el valor exacto de la categoría
     val database = FirebaseDatabase.getInstance().getReference("auctions")
     val snapshot = database.orderByChild("category").equalTo(category).get().await()
+
+    // Verificar si hay subastas
     val auctions = snapshot.children.mapNotNull {
         it.getValue(Auction::class.java)
     }
+
+    Log.d("CategoryFilter", "Subastas obtenidas: ${auctions.size}")  // Log para ver la cantidad de subastas obtenidas
     onComplete(auctions)
 }

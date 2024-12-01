@@ -29,6 +29,7 @@ fun EditAuctionScreen(navController: NavHostController, auctionId: String) {
     var auctionStartingPrice by remember { mutableStateOf(TextFieldValue("")) }
     var auctionCategory by remember { mutableStateOf(TextFieldValue("")) }
     var auctionEndTime by remember { mutableStateOf(TextFieldValue("")) }
+    var auctionImageUrl by remember { mutableStateOf("") } // Variable para almacenar la imagen
 
     // Recuperar los datos de la subasta de Firebase
     val database = FirebaseDatabase.getInstance()
@@ -45,6 +46,7 @@ fun EditAuctionScreen(navController: NavHostController, auctionId: String) {
                     auctionStartingPrice = TextFieldValue(auction.startingPrice.toString())
                     auctionCategory = TextFieldValue(auction.category)
                     auctionEndTime = TextFieldValue(auction.endTime.toString())
+                    auctionImageUrl = auction.imageUrl // Guardar la URL de la imagen
                 }
             }
 
@@ -121,14 +123,35 @@ fun EditAuctionScreen(navController: NavHostController, auctionId: String) {
         Spacer(modifier = Modifier.height(24.dp))
 
         // Botón para guardar los cambios
-        Button(onClick = { saveAuctionChanges(navController, auctionId, auctionTitle.text, auctionDescription.text, auctionStartingPrice.text.toDouble(), auctionCategory.text, auctionEndTime.text.toLong()) }) {
+        Button(onClick = {
+            saveAuctionChanges(
+                navController,
+                auctionId,
+                auctionTitle.text,
+                auctionDescription.text,
+                auctionStartingPrice.text.toDouble(),
+                auctionCategory.text,
+                auctionEndTime.text.toLong(),
+                auctionImageUrl // Pasar la URL de la imagen actual
+            )
+        }) {
             Text("Guardar Cambios")
         }
     }
 }
 
+
 // Función para guardar los cambios en Firebase
-fun saveAuctionChanges(navController: NavHostController, auctionId: String, title: String, description: String, startingPrice: Double, category: String, endTime: Long) {
+fun saveAuctionChanges(
+    navController: NavHostController,
+    auctionId: String,
+    title: String,
+    description: String,
+    startingPrice: Double,
+    category: String,
+    endTime: Long,
+    currentImageUrl: String // Parámetro adicional para la imagen
+) {
     val database = FirebaseDatabase.getInstance()
     val auctionRef = database.getReference("auctions").child(auctionId)
 
@@ -140,7 +163,7 @@ fun saveAuctionChanges(navController: NavHostController, auctionId: String, titl
         id = auctionId,
         title = title,
         description = description,
-        imageUrl = "", // Puedes manejar la actualización de la imagen si es necesario
+        imageUrl = currentImageUrl, // Mantener la URL de la imagen actual
         category = category,
         startingPrice = startingPrice,
         currentBid = startingPrice, // Se puede establecer al valor inicial

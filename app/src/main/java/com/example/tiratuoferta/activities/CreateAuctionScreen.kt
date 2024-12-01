@@ -2,32 +2,32 @@ package com.example.tiratuoferta.activities
 
 import android.net.Uri
 import android.app.DatePickerDialog
-    import android.app.TimePickerDialog
-    import android.content.Context
-    import android.util.Log
-    import androidx.compose.foundation.layout.*
-    import androidx.compose.foundation.text.KeyboardOptions
-    import androidx.compose.material.*
-    import androidx.compose.runtime.*
-    import androidx.compose.ui.Modifier
-    import androidx.compose.ui.text.input.KeyboardType
-    import androidx.compose.ui.unit.dp
-    import androidx.compose.ui.platform.LocalContext
-    import androidx.compose.ui.graphics.Color
-    import androidx.compose.material.icons.Icons
-    import androidx.compose.material.icons.filled.ArrowDropDown
-    import androidx.navigation.NavController
-    import com.example.tiratuoferta.models.Auction
-    import com.google.firebase.firestore.FirebaseFirestore
-    import com.google.firebase.storage.FirebaseStorage
-    import java.util.*
-    import androidx.activity.compose.rememberLauncherForActivityResult
-    import androidx.activity.result.contract.ActivityResultContracts
+import android.app.TimePickerDialog
+import android.content.Context
+import android.util.Log
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.graphics.Color
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.navigation.NavController
+import com.example.tiratuoferta.models.Auction
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
+import java.util.*
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
-    import java.text.SimpleDateFormat
+import java.text.SimpleDateFormat
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -41,12 +41,15 @@ fun CreateAuctionScreen(navController: NavController, saveAuction: (Auction) -> 
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
     var selectedCategory by remember { mutableStateOf<String?>(null) }
 
+    var showError by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf("") }
+
     val context = LocalContext.current
     val auth = FirebaseAuth.getInstance()
     val currentUser = auth.currentUser
 
     // Lista de categorías predefinidas
-    val categories = listOf("Electrónica", "Ropa", "Juguetes", "Automóviles", "Hogar")
+    val categories = listOf("Electronica", "Ropa", "Juguetes", "Automoviles", "Hogar")
 
     // Launcher para seleccionar una imagen
     val imagePickerLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
@@ -172,25 +175,49 @@ fun CreateAuctionScreen(navController: NavController, saveAuction: (Auction) -> 
         Section(title = "") {
             Button(
                 onClick = {
-                    if (imageUrl != null && currentUser != null) {
-                        val auction = Auction(
-                            id = UUID.randomUUID().toString(),
-                            title = title,
-                            description = description,
-                            imageUrl = imageUrl ?: "",
-                            startingPrice = startingPrice.toDoubleOrNull() ?: 0.0,
-                            minimumIncrease = minimumIncrease.toDoubleOrNull() ?: 0.0,
-                            endTime = selectedDate ?: 0L,
-                            userId = currentUser.uid,
-                            startTime = System.currentTimeMillis(),
-                            category = selectedCategory ?: ""
-                        )
-                        saveAuction(auction)
-                        navController.navigate("home") {
-                            popUpTo("home") { inclusive = true }
-                        }
+                    // Validaciones
+                    if (title.isBlank()) {
+                        errorMessage = "El título no puede estar vacío"
+                        showError = true
+                    } else if (description.isBlank()) {
+                        errorMessage = "La descripción no puede estar vacía"
+                        showError = true
+                    } else if (startingPrice.isBlank() || startingPrice.toDoubleOrNull() == null) {
+                        errorMessage = "El precio inicial debe ser un número válido"
+                        showError = true
+                    } else if (minimumIncrease.isBlank() || minimumIncrease.toDoubleOrNull() == null) {
+                        errorMessage = "El incremento mínimo debe ser un número válido"
+                        showError = true
+                    } else if (selectedCategory.isNullOrEmpty()) {
+                        errorMessage = "Debe seleccionar una categoría"
+                        showError = true
+                    } else if (imageUrl == null) {
+                        errorMessage = "Debe seleccionar una imagen"
+                        showError = true
+                    } else if (selectedDate == null || selectedDate!! < System.currentTimeMillis()) {
+                        errorMessage = "La fecha de finalización debe ser posterior a la fecha actual"
+                        showError = true
                     } else {
-                        Log.d("CreateAuction", "No se ha seleccionado una imagen o el usuario no está autenticado.")
+                        showError = false
+                        // Crear la subasta si todo es válido
+                        if (currentUser != null) {
+                            val auction = Auction(
+                                id = UUID.randomUUID().toString(),
+                                title = title,
+                                description = description,
+                                imageUrl = imageUrl ?: "",
+                                startingPrice = startingPrice.toDoubleOrNull() ?: 0.0,
+                                minimumIncrease = minimumIncrease.toDoubleOrNull() ?: 0.0,
+                                endTime = selectedDate ?: 0L,
+                                userId = currentUser.uid,
+                                startTime = System.currentTimeMillis(),
+                                category = selectedCategory ?: ""
+                            )
+                            saveAuction(auction)
+                            navController.navigate("home") {
+                                popUpTo("home") { inclusive = true }
+                            }
+                        }
                     }
                 },
                 modifier = Modifier.fillMaxWidth(),
@@ -198,6 +225,15 @@ fun CreateAuctionScreen(navController: NavController, saveAuction: (Auction) -> 
                 colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.secondary)
             ) {
                 Text("Crear Subasta", color = Color.White)
+            }
+
+            // Mostrar mensaje de error si alguna validación falla
+            if (showError) {
+                Text(
+                    text = errorMessage,
+                    color = Color.Red,
+                    modifier = Modifier.padding(top = 16.dp)
+                )
             }
         }
     }
@@ -217,24 +253,20 @@ fun Section(title: String, content: @Composable () -> Unit) {
     }
 }
 
-
-// Función para subir la imagen a Firebase Storage y obtener la URL de descarga
 fun uploadImageToFirebase(uri: Uri, onSuccess: (String) -> Unit) {
     val storageRef = FirebaseStorage.getInstance().reference.child("images/${UUID.randomUUID()}")
     storageRef.putFile(uri)
         .addOnSuccessListener {
             storageRef.downloadUrl.addOnSuccessListener { downloadUrl ->
                 // Llamar onSuccess con la URL de la imagen
-                onSuccess(downloadUrl.toString())  // Solo se obtiene la URL, no se guarda la subasta
+                onSuccess(downloadUrl.toString())
             }
         }
         .addOnFailureListener {
-            // Maneja el error si ocurre
             Log.d("UploadImage", "Error al subir la imagen: ${it.message}")
         }
 }
 
-// Función para mostrar el DatePicker y TimePicker
 fun showDateTimePicker(context: Context, onDateTimeSelected: (Long) -> Unit) {
     val calendar = Calendar.getInstance()
     DatePickerDialog(context, { _, year, month, day ->
@@ -245,8 +277,6 @@ fun showDateTimePicker(context: Context, onDateTimeSelected: (Long) -> Unit) {
         TimePickerDialog(context, { _, hour, minute ->
             calendar.set(Calendar.HOUR_OF_DAY, hour)
             calendar.set(Calendar.MINUTE, minute)
-
-            // Retornar el tiempo en milisegundos
             onDateTimeSelected(calendar.timeInMillis)
         }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), true).show()
     }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)).show()
