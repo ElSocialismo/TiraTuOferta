@@ -121,6 +121,13 @@ fun MainScreen() {
                     val auctionId = backStackEntry.arguments?.getString("auctionId") ?: ""
                     PlaceBidScreen(navController = navController, auctionId = auctionId)
                 }
+
+                composable("categoryAuctionList/{category}") { backStackEntry ->
+                    val category = backStackEntry.arguments?.getString("category") ?: ""
+                    CategoryAuctionListScreen(navController = navController, category = category)
+                }
+
+                // Otras pantallas
                 composable("misSubastas") { MisSubastasScreen() }
                 composable("contactar") { ContactarScreen() }
                 composable("ayuda") { AyudaScreen() }
