@@ -1,5 +1,7 @@
 package com.example.tiratuoferta.components
 
+import android.app.Activity
+import android.content.Intent
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
@@ -8,13 +10,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.tiratuoferta.activities.BottomNavItem
+import com.example.tiratuoferta.activities.LoginActivity
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
 
 @Composable
 fun DrawerContent(navController: NavController, drawerState: DrawerState) {
-    val scope = rememberCoroutineScope() // Define la corutina aquí
-    var showLogoutDialog by remember { mutableStateOf(false) } // Estado para el cuadro de diálogo
+    val scope = rememberCoroutineScope()
+    var showLogoutDialog by remember { mutableStateOf(false) }
 
     Column {
         Text(
@@ -59,9 +62,9 @@ fun DrawerContent(navController: NavController, drawerState: DrawerState) {
             }
         }
 
+        // Botón de Cerrar Sesión
         DrawerItem("Cerrar sesión") {
-            scope.launch { drawerState.close() }
-            showLogoutDialog = true // Activar el cuadro de diálogo
+            showLogoutDialog = true
         }
     }
 
@@ -71,9 +74,13 @@ fun DrawerContent(navController: NavController, drawerState: DrawerState) {
             onConfirm = {
                 showLogoutDialog = false
                 FirebaseAuth.getInstance().signOut() // Cerrar sesión en Firebase
-                navController.navigate("login") { // Navegar al LoginActivity
-                    popUpTo(0) { inclusive = true }
-                }
+
+                // Navegar al LoginActivity y cerrar la actividad actual
+                val intent = Intent(navController.context, LoginActivity::class.java)
+                navController.context.startActivity(intent)
+
+                // Asegúrate de cerrar la actividad actual
+                (navController.context as? Activity)?.finish()
             },
             onDismiss = { showLogoutDialog = false }
         )
@@ -97,7 +104,7 @@ fun LogoutDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
         text = { Text(text = "¿Estás seguro de que deseas cerrar sesión?") },
         confirmButton = {
             TextButton(onClick = onConfirm) {
-                Text(text = "Confirmar")
+                Text(text = "Confirmar", color = MaterialTheme.colors.error)
             }
         },
         dismissButton = {

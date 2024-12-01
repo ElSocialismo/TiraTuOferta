@@ -124,7 +124,6 @@ fun MainScreen() {
                 composable("misSubastas") { MisSubastasScreen() }
                 composable("contactar") { ContactarScreen() }
                 composable("ayuda") { AyudaScreen() }
-                composable("cerrarSesion") { CerrarSesionScreen() }
             }
         }
     }
