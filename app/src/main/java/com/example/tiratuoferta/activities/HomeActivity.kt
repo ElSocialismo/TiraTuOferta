@@ -67,6 +67,8 @@ fun MainScreen() {
     val drawerState = rememberDrawerState(DrawerValue.Closed) // Crear estado del drawer
     val scope = rememberCoroutineScope()
 
+    var showFab by remember { mutableStateOf(true) }  // Estado para mostrar/ocultar el FAB
+
     ModalDrawer(
         drawerState = drawerState,
         drawerContent = {
@@ -91,11 +93,14 @@ fun MainScreen() {
                 BottomNavBar(navController) // Aquí pasa el navController al BottomNavBar
             },
             floatingActionButton = {
-                FloatingActionButton(
-                    onClick = { navController.navigate("createAuction") },
-                    modifier = Modifier.padding(16.dp)
-                ) {
-                    Icon(Icons.Filled.Add, contentDescription = "Add")
+                // Solo mostramos el FAB si showFab es true
+                if (showFab) {
+                    FloatingActionButton(
+                        onClick = { navController.navigate("createAuction") },
+                        modifier = Modifier.padding(16.dp)
+                    ) {
+                        Icon(Icons.Filled.Add, contentDescription = "Add")
+                    }
                 }
             }
         ) { innerPadding ->
@@ -104,21 +109,34 @@ fun MainScreen() {
                 startDestination = BottomNavItem.Home.route,
                 modifier = Modifier.padding(innerPadding)
             ) {
-                composable(BottomNavItem.Home.route) { AuctionList(navController) }
-                composable(BottomNavItem.Categories.route) { CategoriesScreen(navController) }
-                composable(BottomNavItem.Favorites.route) { FavoritesScreen(navController) }
-                composable(BottomNavItem.Profile.route) { ProfileScreen() }
+                composable(BottomNavItem.Home.route) {
+                    AuctionList(navController)
+                    showFab = true  // Mostrar el FAB cuando estamos en la pantalla de inicio
+                }
+                composable(BottomNavItem.Categories.route) {
+                    CategoriesScreen(navController)
+                    showFab = false  // Ocultar el FAB cuando estamos en Categorías
+                }
+                composable(BottomNavItem.Favorites.route) {
+                    FavoritesScreen(navController)
+                    showFab = false  // Ocultar el FAB cuando estamos en Favoritos
+                }
+                composable(BottomNavItem.Profile.route) {
+                    ProfileScreen()
+                    showFab = false  // Ocultar el FAB cuando estamos en Perfil
+                }
                 composable("createAuction") {
                     CreateAuctionScreen(navController = navController, saveAuction = { auction ->
                         saveAuctionToFirebase(auction)
                     })
+                    showFab = false  // Ocultar el FAB cuando estamos en Crear Subasta
                 }
                 composable("auctionDetails/{auctionId}") { backStackEntry ->
                     val auctionId = backStackEntry.arguments?.getString("auctionId") ?: ""
                     if (auctionId.isNotEmpty()) {
                         AuctionDetailsScreen(navController = navController, auctionId = auctionId)
+                        showFab = false  // Ocultar el FAB cuando estamos en los detalles de la subasta
                     } else {
-                        // Manejo de caso si auctionId está vacío
                         Log.e("Navigation", "Auction ID vacío")
                     }
                 }
@@ -126,14 +144,15 @@ fun MainScreen() {
                     val auctionId = backStackEntry.arguments?.getString("auctionId") ?: ""
                     if (auctionId.isNotEmpty()) {
                         PlaceBidScreen(navController = navController, auctionId = auctionId)
+                        showFab = false  // Ocultar el FAB cuando estamos en la pantalla de hacer una oferta
                     } else {
                         Log.e("Navigation", "Auction ID vacío")
                     }
                 }
-
                 composable("categoryAuctionList/{category}") { backStackEntry ->
                     val category = backStackEntry.arguments?.getString("category") ?: ""
                     CategoryAuctionListScreen(navController = navController, category = category)
+                    showFab = false  // Ocultar el FAB cuando estamos en la lista de subastas por categoría
                 }
 
                 // Ruta para editar subastas
@@ -141,6 +160,7 @@ fun MainScreen() {
                     val auctionId = backStackEntry.arguments?.getString("auctionId") ?: ""
                     if (auctionId.isNotEmpty()) {
                         EditAuctionScreen(navController = navController, auctionId = auctionId)
+                        showFab = false  // Ocultar el FAB cuando estamos en la pantalla de editar subasta
                     } else {
                         Log.e("Navigation", "Auction ID vacío")
                     }
@@ -150,10 +170,23 @@ fun MainScreen() {
                 composable("misSubastas") { MisSubastasScreen(navController = navController) }
                 composable("contactar") { ContactarScreen() }
                 composable("ayuda") { AyudaScreen() }
+
+                // Nueva ruta para la pantalla de chat
+                composable("chat/{auctionId}") { backStackEntry ->
+                    val auctionId = backStackEntry.arguments?.getString("auctionId") ?: ""
+                    if (auctionId.isNotEmpty()) {
+                        ChatScreen(navController = navController, auctionId = auctionId)
+                        showFab = false  // Ocultar el FAB cuando estamos en la pantalla de chat
+                    } else {
+                        Log.e("Navigation", "Auction ID vacío")
+                    }
+                }
             }
         }
     }
 }
+
+
 
 fun saveAuctionToFirebase(auction: Auction) {
     // Verificar que auction.id no sea nulo o vacío

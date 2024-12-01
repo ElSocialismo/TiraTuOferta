@@ -8,11 +8,13 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -51,6 +53,8 @@ class RegisterActivity : ComponentActivity() {
 fun RegisterScreen(onRegisterSuccess: () -> Unit) {
     var email by remember { mutableStateOf("") }
     var fullName by remember { mutableStateOf("") }
+    var phoneNumber by remember { mutableStateOf("") }
+    var dni by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
     var termsAccepted by remember { mutableStateOf(false) }
@@ -97,6 +101,40 @@ fun RegisterScreen(onRegisterSuccess: () -> Unit) {
                 value = fullName,
                 onValueChange = { fullName = it },
                 label = { Text("Full Name") },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(8.dp),
+                singleLine = true,
+                colors = TextFieldDefaults.outlinedTextFieldColors(
+                    focusedBorderColor = Color(0xFF6200EE),
+                    unfocusedBorderColor = Color.Gray
+                )
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Campo de teléfono
+            OutlinedTextField(
+                value = phoneNumber,
+                onValueChange = { phoneNumber = it },
+                label = { Text("Phone Number") },
+                keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Phone),
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(8.dp),
+                singleLine = true,
+                colors = TextFieldDefaults.outlinedTextFieldColors(
+                    focusedBorderColor = Color(0xFF6200EE),
+                    unfocusedBorderColor = Color.Gray
+                )
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Campo de DNI
+            OutlinedTextField(
+                value = dni,
+                onValueChange = { dni = it },
+                label = { Text("DNI") },
+                keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(8.dp),
                 singleLine = true,
@@ -164,21 +202,28 @@ fun RegisterScreen(onRegisterSuccess: () -> Unit) {
                         registerResult = "Passwords do not match"
                     } else if (!termsAccepted) {
                         registerResult = "You must accept the terms to proceed"
+                    } else if (phoneNumber.length < 9) {
+                        registerResult = "Phone number must have at least 9 digits"
+                    } else if (dni.length != 8) {
+                        registerResult = "DNI must be 8 digits"
                     } else {
+                        // Crear usuario con Firebase Auth
                         auth.createUserWithEmailAndPassword(email, password)
                             .addOnCompleteListener { task ->
                                 if (task.isSuccessful) {
                                     val userId = auth.currentUser?.uid
                                     val user = mapOf(
                                         "fullName" to fullName,
-                                        "email" to email
+                                        "email" to email,
+                                        "phoneNumber" to phoneNumber,
+                                        "dni" to dni
                                     )
 
                                     if (userId != null) {
                                         dbRef.child("users").child(userId).setValue(user)
                                             .addOnSuccessListener {
                                                 registerResult = "Registration successful!"
-                                                onRegisterSuccess()
+                                                onRegisterSuccess() // Redirige o realiza la acción
                                             }
                                             .addOnFailureListener { e ->
                                                 registerResult = "Registration failed: ${e.message}"
