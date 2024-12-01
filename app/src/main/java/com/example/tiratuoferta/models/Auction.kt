@@ -17,7 +17,10 @@ data class Auction(
     val userId: String = "",
     val participants: MutableMap<String, Boolean>? = null,
     var favorite: Boolean = false,
-    val startTime: Long = 0L
+    val startTime: Long = 0L,
+
+    // Añadido campo 'bids' para las pujas en la subasta
+    val bids: MutableMap<String, Bid> = mutableMapOf()  // Campo para almacenar las pujas
 ) : Parcelable {
     // Constructor vacío para Firebase
     constructor() : this(
@@ -33,7 +36,8 @@ data class Auction(
         userId = "",
         participants = null,
         favorite = false,
-        startTime = 0L
+        startTime = 0L,
+        bids = mutableMapOf()  // Inicializamos el mapa de pujas vacío
     )
 }
 

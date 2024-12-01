@@ -16,6 +16,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
 import com.example.tiratuoferta.models.Auction
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
@@ -62,7 +63,7 @@ fun AuctionDetailsScreen(navController: NavController, auctionId: String) {
         }
     }
 
-    auction?.let {
+    auction?.let { auction ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -81,11 +82,11 @@ fun AuctionDetailsScreen(navController: NavController, auctionId: String) {
                 Spacer(modifier = Modifier.weight(1f))
                 IconButton(onClick = {
                     // Marcar o desmarcar como favorito
-                    val updatedAuction = it.copy(favorite = !it.favorite)
+                    val updatedAuction = auction.copy(favorite = !auction.favorite)
                     auctionRef.child("favorite").setValue(updatedAuction.favorite)
 
                     // Agregar o quitar de la lista de favoritos del usuario
-                    val userId = "user123"  // Este debe ser el ID del usuario actual
+                    val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return@IconButton
                     val favoritesRef = FirebaseDatabase.getInstance().getReference("users/$userId/favorites")
                     if (updatedAuction.favorite) {
                         favoritesRef.child(auctionId).setValue(true)  // Agregar a favoritos
@@ -94,7 +95,7 @@ fun AuctionDetailsScreen(navController: NavController, auctionId: String) {
                     }
                 }) {
                     Icon(
-                        painter = painterResource(id = if (it.favorite) android.R.drawable.star_on else android.R.drawable.star_off),
+                        painter = painterResource(id = if (auction.favorite) android.R.drawable.star_on else android.R.drawable.star_off),
                         contentDescription = "Favorite"
                     )
                 }
@@ -104,7 +105,7 @@ fun AuctionDetailsScreen(navController: NavController, auctionId: String) {
 
             // Imagen de la subasta
             Image(
-                painter = rememberImagePainter(data = it.imageUrl),
+                painter = rememberImagePainter(data = auction.imageUrl),
                 contentDescription = null,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -114,7 +115,7 @@ fun AuctionDetailsScreen(navController: NavController, auctionId: String) {
             Spacer(modifier = Modifier.height(16.dp))
 
             // Título
-            Text(text = it.title, fontWeight = FontWeight.Bold, fontSize = 22.sp)
+            Text(text = auction.title, fontWeight = FontWeight.Bold, fontSize = 22.sp)
 
             Spacer(modifier = Modifier.height(8.dp))
 
@@ -128,8 +129,8 @@ fun AuctionDetailsScreen(navController: NavController, auctionId: String) {
                 horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text(text = "Precio inicial: ${it.startingPrice}$", fontSize = 16.sp)
-                Text(text = "Puja actual: ${it.currentBid}$", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = Color.Green)
+                Text(text = "Precio inicial: ${auction.startingPrice}$", fontSize = 16.sp)
+                Text(text = "Puja actual: ${auction.currentBid}$", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = Color.Green)
             }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -141,7 +142,7 @@ fun AuctionDetailsScreen(navController: NavController, auctionId: String) {
                     .background(Color.LightGray, shape = RoundedCornerShape(8.dp))
                     .padding(16.dp)
             ) {
-                Text(text = it.description)
+                Text(text = auction.description)
             }
 
             Spacer(modifier = Modifier.height(16.dp))
