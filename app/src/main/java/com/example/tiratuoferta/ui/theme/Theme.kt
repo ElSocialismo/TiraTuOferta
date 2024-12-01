@@ -9,28 +9,32 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 
+// Definir la paleta de colores personalizada
 private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
+    primary = Color(0xFF00695C), // Verde petróleo
+    secondary = Color(0xFFFF7043), // Naranja coral
+    background = Color(0xFF37474F), // Negro carbón
+    surface = Color(0xFF37474F), // Fondo oscuro
+    onPrimary = Color.White,
+    onSecondary = Color.White,
+    onBackground = Color.White,
+    onSurface = Color.White,
+    tertiary = Color(0xFFFDD835) // Amarillo mostaza
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
-
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
+    primary = Color(0xFF00695C), // Verde petróleo
+    secondary = Color(0xFFFF7043), // Naranja coral
+    background = Color(0xFFECEFF1), // Gris humo
+    surface = Color(0xFFECEFF1), // Fondo claro
     onPrimary = Color.White,
     onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
+    onBackground = Color(0xFF37474F), // Texto oscuro en fondo claro
+    onSurface = Color(0xFF37474F), // Texto oscuro en superficies claras
+    tertiary = Color(0xFFFDD835) // Amarillo mostaza
 )
 
 @Composable
