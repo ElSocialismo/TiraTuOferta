@@ -4,6 +4,7 @@ package com.example.tiratuoferta.screens
 import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -18,6 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -42,14 +44,36 @@ fun PlaceBidScreen(navController: NavController, auctionId: String) {
     // Estado para almacenar el historial de pujas
     val bidHistory = remember { mutableStateListOf<Bid>() }
     var currentBid by remember { mutableStateOf(0.0) }
+    var startingPrice by remember { mutableStateOf(0.0) }
+    var minimumIncrease by remember { mutableStateOf(0.0) }
     var errorMessage by remember { mutableStateOf("") }
 
-    // Listener para obtener el `currentBid` y el historial de pujas en tiempo real
+    // Listener para obtener el `currentBid`, `startingPrice`, `minimumIncrease` y el historial de pujas en tiempo real
     LaunchedEffect(Unit) {
-        // Obtener el `currentBid`
+        // Obtener el `currentBid`, `startingPrice` y `minimumIncrease`
         auctionRef.child("currentBid").addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 currentBid = snapshot.getValue(Double::class.java) ?: 0.0
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                // Manejo de errores
+            }
+        })
+
+        auctionRef.child("startingPrice").addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                startingPrice = snapshot.getValue(Double::class.java) ?: 0.0
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                // Manejo de errores
+            }
+        })
+
+        auctionRef.child("minimumIncrease").addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                minimumIncrease = snapshot.getValue(Double::class.java) ?: 0.0
             }
 
             override fun onCancelled(error: DatabaseError) {
@@ -98,16 +122,26 @@ fun PlaceBidScreen(navController: NavController, auctionId: String) {
             Text(text = "Puja actual: ${currentBid}$", style = MaterialTheme.typography.body1, fontWeight = FontWeight.Bold)
             Spacer(modifier = Modifier.height(8.dp))
 
+            // Mostrar el precio inicial y el incremento mínimo
+            Text(text = "Precio inicial: ${startingPrice}$", style = MaterialTheme.typography.body2)
+            Text(text = "Incremento mínimo: ${minimumIncrease}$", style = MaterialTheme.typography.body2)
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Campo de puja
             TextField(
                 value = bidAmount,
-                onValueChange = { bidAmount = it },
+                onValueChange = {
+                    if (it.length <= 7) { // Limitar a 7 caracteres
+                        bidAmount = it
+                    }
+                },
                 label = { Text("Ingrese su puja") },
-                modifier = Modifier.fillMaxWidth()
+                keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number)
             )
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Mostrar mensaje de error si el monto es menor o igual al `currentBid`
+            // Mostrar mensaje de error si el monto no es válido
             if (errorMessage.isNotEmpty()) {
                 Text(text = errorMessage, color = Color.Red, fontSize = 14.sp)
             }
@@ -117,8 +151,16 @@ fun PlaceBidScreen(navController: NavController, auctionId: String) {
             Button(
                 onClick = {
                     val amount = bidAmount.toDoubleOrNull()
-                    if (amount == null || amount <= currentBid) {
+
+                    // Validar que la puja sea mayor que el precio inicial y que cumpla con el incremento mínimo
+                    if (amount == null) {
+                        errorMessage = "Por favor ingrese un valor válido"
+                    } else if (amount <= startingPrice) {
+                        errorMessage = "La puja debe ser mayor al precio inicial de ${startingPrice}$"
+                    } else if (amount <= currentBid) {
                         errorMessage = "La puja debe ser mayor a la puja actual de ${currentBid}$"
+                    } else if (amount < currentBid + minimumIncrease) {
+                        errorMessage = "La puja debe ser al menos ${minimumIncrease}$ mayor que la puja actual"
                     } else {
                         val newBid = Bid(userId = userId, amount = amount)
 
@@ -137,7 +179,6 @@ fun PlaceBidScreen(navController: NavController, auctionId: String) {
             ) {
                 Text("Confirmar Puja")
             }
-
 
             Spacer(modifier = Modifier.height(16.dp))
 
