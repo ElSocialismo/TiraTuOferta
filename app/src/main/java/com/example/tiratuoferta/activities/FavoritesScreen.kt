@@ -1,5 +1,4 @@
-package com.example.tiratuoferta.activities
-
+import android.content.Context
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
@@ -9,26 +8,29 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import androidx.navigation.NavController
 import com.example.tiratuoferta.models.Auction
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 import kotlinx.coroutines.tasks.await
 import java.text.SimpleDateFormat
 import java.util.*
 
-// Pantalla de Favoritos
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FavoritesScreen(navController: NavController) {
     // Estado mutable para almacenar las subastas favoritas
     var favoriteAuctions by remember { mutableStateOf<List<Auction>>(emptyList()) }
+    var favoriteAuctionIds by remember { mutableStateOf<Set<String>>(emptySet()) }
 
     // Obtener las subastas favoritas desde Firebase
     LaunchedEffect(Unit) {
-        getFavoriteAuctions { auctions ->
+        getFavoriteAuctions { auctions, favorites ->
             favoriteAuctions = auctions
+            favoriteAuctionIds = favorites
         }
     }
 
@@ -50,7 +52,7 @@ fun FavoritesScreen(navController: NavController) {
                 // Si hay subastas favoritas, las mostramos en una lista
                 LazyColumn(modifier = Modifier.fillMaxSize()) {
                     items(favoriteAuctions) { auction ->
-                        AuctionItem(auction = auction, navController = navController)
+                        AuctionItem(auction = auction, navController = navController, isFavorite = favoriteAuctionIds.contains(auction.id))
                     }
                 }
             }
@@ -59,14 +61,14 @@ fun FavoritesScreen(navController: NavController) {
 }
 
 // Función para obtener las subastas favoritas desde Firebase
-suspend fun getFavoriteAuctions(onComplete: (List<Auction>) -> Unit) {
-    val userId = "user123" // Aquí deberías usar el ID del usuario actual
+suspend fun getFavoriteAuctions(onComplete: (List<Auction>, Set<String>) -> Unit) {
+    val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
     val auctionsRef = FirebaseDatabase.getInstance().getReference("users/$userId/favorites")
 
     try {
         // Obtener las IDs de las subastas favoritas
         val snapshot = auctionsRef.get().await()
-        val favoriteAuctionIds = snapshot.children.mapNotNull { it.key }
+        val favoriteAuctionIds = snapshot.children.mapNotNull { it.key }.toSet()
 
         // Ahora obtenemos las subastas completas
         val allAuctionsRef = FirebaseDatabase.getInstance().getReference("auctions")
@@ -78,18 +80,20 @@ suspend fun getFavoriteAuctions(onComplete: (List<Auction>) -> Unit) {
             if (auction != null && favoriteAuctionIds.contains(auction.id)) auction else null
         }
 
-        onComplete(auctions) // Devolvemos las subastas favoritas
+        onComplete(auctions, favoriteAuctionIds) // Devolvemos las subastas favoritas y sus IDs
     } catch (e: Exception) {
-        onComplete(emptyList()) // Si ocurre un error, devolvemos una lista vacía
+        onComplete(emptyList(), emptySet()) // Si ocurre un error, devolvemos una lista vacía
     }
 }
 
 // Componente para mostrar cada subasta en la lista de favoritos
 @Composable
-fun AuctionItem(auction: Auction, navController: NavController) {
+fun AuctionItem(auction: Auction, navController: NavController, isFavorite: Boolean) {
     // Formato de fecha para mostrar la fecha de finalización
     val dateFormatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
     val endDate = dateFormatter.format(Date(auction.endTime))
+
+    val context = LocalContext.current  // Obtener el contexto dentro del composable
 
     Column(modifier = Modifier.padding(16.dp)) {
         // Mostrar imagen de la subasta
@@ -127,5 +131,35 @@ fun AuctionItem(auction: Auction, navController: NavController) {
         ) {
             Text("Ver Detalles")
         }
+
+        // Mostrar botón de "Agregar a Favoritos" solo si no está en favoritos
+        if (!isFavorite) {
+            Button(
+                onClick = {
+                    addToFavorites(auction.id, context)  // Llamar a la función para agregar a favoritos
+                },
+                modifier = Modifier.padding(top = 8.dp)
+            ) {
+                Text("Agregar a Favoritos")
+            }
+        }
     }
+}
+
+// Función para agregar una subasta a los favoritos del usuario
+fun addToFavorites(auctionId: String, context: Context) {
+    // Obtener el ID del usuario actual (usamos FirebaseAuth para obtenerlo)
+    val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
+
+    // Referencia de la base de datos donde se almacenan los favoritos
+    val favoritesRef = FirebaseDatabase.getInstance().getReference("users/$userId/favorites")
+
+    // Agregar el ID de la subasta a la lista de favoritos
+    favoritesRef.child(auctionId).setValue(true)
+        .addOnSuccessListener {
+            Toast.makeText(context, "Subasta agregada a favoritos", Toast.LENGTH_SHORT).show()
+        }
+        .addOnFailureListener {
+            Toast.makeText(context, "Error al agregar a favoritos", Toast.LENGTH_SHORT).show()
+        }
 }

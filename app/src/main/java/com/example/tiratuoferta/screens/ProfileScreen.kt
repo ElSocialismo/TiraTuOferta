@@ -161,6 +161,7 @@ fun ProfileScreen() {
     }
 }
 
+
 @Composable
 fun SubastasCreadas(userId: String) {
     val subastasCreadas = remember { mutableStateListOf<Auction>() }
@@ -198,7 +199,6 @@ fun SubastasParticipadas(userId: String) {
 
     // Obtener las subastas en las que el usuario ha participado
     LaunchedEffect(userId) {
-        // Obtén todas las subastas desde Firebase
         FirebaseDatabase.getInstance().reference
             .child("auctions")
             .get() // Obtener todas las subastas
@@ -237,6 +237,7 @@ fun SubastasParticipadas(userId: String) {
         }
     }
 }
+
 
 
 @Composable

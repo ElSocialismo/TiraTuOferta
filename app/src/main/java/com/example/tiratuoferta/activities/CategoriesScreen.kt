@@ -19,6 +19,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.tiratuoferta.R
 import com.example.tiratuoferta.models.Auction
+import com.example.tiratuoferta.screens.AuctionItem
 import com.google.firebase.database.FirebaseDatabase
 import kotlinx.coroutines.tasks.await
 

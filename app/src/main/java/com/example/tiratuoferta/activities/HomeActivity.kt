@@ -1,5 +1,6 @@
 package com.example.tiratuoferta.activities
 
+import FavoritesScreen
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
