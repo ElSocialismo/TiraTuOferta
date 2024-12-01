@@ -22,43 +22,127 @@ import kotlinx.coroutines.tasks.await
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MisSubastasScreen(navController: NavController) {
-    // Estado mutable para almacenar las subastas del usuario
     var myAuctions by remember { mutableStateOf<List<Auction>>(emptyList()) }
 
-    // Obtener las subastas del usuario desde Firebase
     LaunchedEffect(Unit) {
         getUserAuctions { auctions ->
             myAuctions = auctions
         }
     }
 
-    // UI de la pantalla "Mis Subastas"
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Mis Subastas") }
+                title = { Text("Mis Subastas") },
+                colors = TopAppBarDefaults.mediumTopAppBarColors()
             )
         }
     ) { innerPadding ->
-        Column(modifier = Modifier.padding(innerPadding).fillMaxSize()) {
+        Column(
+            modifier = Modifier
+                .padding(innerPadding)
+                .fillMaxSize()
+                .padding(16.dp)
+        ) {
             if (myAuctions.isEmpty()) {
-                // Si el usuario no tiene subastas, mostramos un mensaje
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text(text = "No tienes subastas.")
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "No tienes subastas.",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
                 }
             } else {
-                // Si el usuario tiene subastas, las mostramos en una lista
-                LazyColumn(modifier = Modifier.fillMaxSize()) {
+                LazyColumn(
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    modifier = Modifier.fillMaxSize()
+                ) {
                     items(myAuctions) { auction ->
-                        val context = LocalContext.current // Aquí obtenemos el contexto
-
-                        AuctionItem(
+                        AuctionCard(
                             auction = auction,
                             navController = navController,
-                            onEdit = { navController.navigate("editAuction/${auction.id}") },  // Navegar a la edición
-                            onDelete = { deleteAuction(auction.id, navController, context) }  // Pasamos el contexto
+                            onEdit = { navController.navigate("editAuction/${auction.id}") },
+                            onDelete = { context -> deleteAuction(auction.id, navController, context) }
                         )
                     }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun AuctionCard(
+    auction: Auction,
+    navController: NavController,
+    onEdit: () -> Unit,
+    onDelete: (Context) -> Unit
+) {
+    val context = LocalContext.current
+
+    Card(
+        shape = MaterialTheme.shapes.medium,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            // Imagen de la subasta
+            AsyncImage(
+                model = auction.imageUrl,
+                contentDescription = "Imagen de subasta",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(200.dp)
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Título
+            Text(
+                text = auction.title,
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            // Descripción
+            Text(
+                text = auction.description,
+                maxLines = 2,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Precio actual
+            Text(
+                text = "Precio actual: ${auction.currentBid}$",
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.primary
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Botones de acción
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Button(onClick = { navController.navigate("auctionDetails/${auction.id}") }) {
+                    Text("Ver Detalles")
+                }
+                Button(onClick = { onEdit() }) {
+                    Text("Editar")
+                }
+                Button(onClick = { onDelete(context) }, colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)) {
+                    Text("Eliminar")
                 }
             }
         }
