@@ -66,6 +66,7 @@ fun MainScreen() {
     val navController = rememberNavController()
     val drawerState = rememberDrawerState(DrawerValue.Closed) // Crear estado del drawer
     val scope = rememberCoroutineScope()
+    var showFab by remember { mutableStateOf(false) } // Estado para controlar la visibilidad del FAB
 
     ModalDrawer(
         drawerState = drawerState,
@@ -91,14 +92,25 @@ fun MainScreen() {
                 BottomNavBar(navController) // Aquí pasa el navController al BottomNavBar
             },
             floatingActionButton = {
-                FloatingActionButton(
-                    onClick = { navController.navigate("createAuction") },
-                    modifier = Modifier.padding(16.dp)
-                ) {
-                    Icon(Icons.Filled.Add, contentDescription = "Add")
+                // Mostrar el FAB solo en la pantalla Home
+                if (showFab) {
+                    FloatingActionButton(
+                        onClick = { navController.navigate("createAuction") },
+                        modifier = Modifier.padding(16.dp)
+                    ) {
+                        Icon(Icons.Filled.Add, contentDescription = "Add")
+                    }
                 }
             }
         ) { innerPadding ->
+            // Observamos la ruta de navegación para determinar si mostrar el FAB
+            LaunchedEffect(navController) {
+                // Obtenemos el nombre de la ruta actual
+                navController.addOnDestinationChangedListener { _, destination, _ ->
+                    showFab = destination.route == BottomNavItem.Home.route
+                }
+            }
+
             NavHost(
                 navController = navController,
                 startDestination = BottomNavItem.Home.route,
@@ -118,7 +130,6 @@ fun MainScreen() {
                     if (auctionId.isNotEmpty()) {
                         AuctionDetailsScreen(navController = navController, auctionId = auctionId)
                     } else {
-                        // Manejo de caso si auctionId está vacío
                         Log.e("Navigation", "Auction ID vacío")
                     }
                 }
@@ -130,7 +141,15 @@ fun MainScreen() {
                         Log.e("Navigation", "Auction ID vacío")
                     }
                 }
-
+                composable("chat/{auctionId}") { backStackEntry ->
+                    val auctionId = backStackEntry.arguments?.getString("auctionId") ?: ""
+                    if (auctionId.isNotEmpty()) {
+                        // Llama a tu pantalla de chat pasando el auctionId
+                        ChatScreen(navController = navController, auctionId = auctionId)
+                    } else {
+                        Log.e("Navigation", "Auction ID vacío")
+                    }
+                }
                 composable("categoryAuctionList/{category}") { backStackEntry ->
                     val category = backStackEntry.arguments?.getString("category") ?: ""
                     CategoryAuctionListScreen(navController = navController, category = category)
@@ -154,6 +173,8 @@ fun MainScreen() {
         }
     }
 }
+
+
 
 fun saveAuctionToFirebase(auction: Auction) {
     // Verificar que auction.id no sea nulo o vacío
