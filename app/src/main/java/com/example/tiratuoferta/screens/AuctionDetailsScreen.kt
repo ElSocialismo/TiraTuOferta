@@ -103,24 +103,37 @@ fun AuctionDetailsScreen(navController: NavController, auctionId: String) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Imagen de la subasta
+            // Imagen de la subasta con borde redondeado y sombra
             Image(
                 painter = rememberImagePainter(data = auction.imageUrl),
                 contentDescription = null,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(200.dp)
+                    .height(220.dp)
+                    .background(Color.Gray, shape = RoundedCornerShape(12.dp))
+                    .padding(4.dp)
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
             // Título
-            Text(text = auction.title, fontWeight = FontWeight.Bold, fontSize = 22.sp)
+            Text(
+                text = auction.title,
+                fontWeight = FontWeight.Bold,
+                fontSize = 22.sp,
+                modifier = Modifier.fillMaxWidth()
+            )
 
             Spacer(modifier = Modifier.height(8.dp))
 
             // Contador de tiempo restante
-            Text(text = timeRemaining, fontSize = 16.sp, fontWeight = FontWeight.Medium)
+            Text(
+                text = timeRemaining,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.Red,
+                modifier = Modifier.fillMaxWidth()
+            )
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -129,8 +142,17 @@ fun AuctionDetailsScreen(navController: NavController, auctionId: String) {
                 horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text(text = "Precio inicial: ${auction.startingPrice}$", fontSize = 16.sp)
-                Text(text = "Puja actual: ${auction.currentBid}$", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = Color.Green)
+                Text(
+                    text = "Precio inicial: ${auction.startingPrice}$",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Medium
+                )
+                Text(
+                    text = "Puja actual: ${auction.currentBid}$",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Green
+                )
             }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -139,22 +161,28 @@ fun AuctionDetailsScreen(navController: NavController, auctionId: String) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(Color.LightGray, shape = RoundedCornerShape(8.dp))
+                    .background(Color(0xFFF5F5F5), shape = RoundedCornerShape(8.dp))
                     .padding(16.dp)
             ) {
-                Text(text = auction.description)
+                Text(
+                    text = auction.description,
+                    fontSize = 16.sp,
+                    color = Color.DarkGray
+                )
             }
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Botón de realizar puja
+            // Botón de realizar puja con un diseño más llamativo
             Button(
                 onClick = { navController.navigate("placeBid/${auctionId}") },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp)
+                    .height(56.dp),
+                colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF6200EE))
             ) {
-                Text(text = "Realizar Puja")
+                Text(text = "Realizar Puja", fontSize = 18.sp, color = Color.White)
             }
         }
     } ?: run {
