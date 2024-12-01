@@ -64,13 +64,13 @@ class HomeActivity : ComponentActivity() {
 @Composable
 fun MainScreen() {
     val navController = rememberNavController()
-    val drawerState = rememberDrawerState(DrawerValue.Closed)
+    val drawerState = rememberDrawerState(DrawerValue.Closed) // Crear estado del drawer
     val scope = rememberCoroutineScope()
 
     ModalDrawer(
         drawerState = drawerState,
         drawerContent = {
-            DrawerContent(navController)
+            DrawerContent(navController, drawerState)  // Pasar el drawerState aquí
         }
     ) {
         Scaffold(
@@ -105,14 +105,9 @@ fun MainScreen() {
                 modifier = Modifier.padding(innerPadding)
             ) {
                 composable(BottomNavItem.Home.route) { AuctionList(navController) }
-
-                // Categorías
                 composable(BottomNavItem.Categories.route) { CategoriesScreen(navController) }
-
                 composable(BottomNavItem.Favorites.route) { FavoritesScreen(navController) }
                 composable(BottomNavItem.Profile.route) { ProfileScreen() }
-
-                // Pantallas adicionales
                 composable("createAuction") {
                     CreateAuctionScreen(navController = navController, saveAuction = { auction ->
                         saveAuctionToFirebase(auction)
@@ -126,13 +121,6 @@ fun MainScreen() {
                     val auctionId = backStackEntry.arguments?.getString("auctionId") ?: ""
                     PlaceBidScreen(navController = navController, auctionId = auctionId)
                 }
-
-                composable("categoryAuctionList/{category}") { backStackEntry ->
-                    val category = backStackEntry.arguments?.getString("category") ?: ""
-                    CategoryAuctionListScreen(navController = navController, category = category)
-                }
-
-                // Otras pantallas
                 composable("misSubastas") { MisSubastasScreen() }
                 composable("contactar") { ContactarScreen() }
                 composable("ayuda") { AyudaScreen() }
@@ -141,6 +129,7 @@ fun MainScreen() {
         }
     }
 }
+
 
 
 
