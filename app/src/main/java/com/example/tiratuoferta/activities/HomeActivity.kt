@@ -128,14 +128,21 @@ fun MainScreen() {
                     CategoryAuctionListScreen(navController = navController, category = category)
                 }
 
+                // Agregar esta ruta
+                composable("editAuction/{auctionId}") { backStackEntry ->
+                    val auctionId = backStackEntry.arguments?.getString("auctionId") ?: ""
+                    EditAuctionScreen(navController = navController, auctionId = auctionId)
+                }
+
                 // Otras pantallas
-                composable("misSubastas") { MisSubastasScreen() }
+                composable("misSubastas") { MisSubastasScreen(navController = navController) }
                 composable("contactar") { ContactarScreen() }
                 composable("ayuda") { AyudaScreen() }
             }
         }
     }
 }
+
 
 
 
