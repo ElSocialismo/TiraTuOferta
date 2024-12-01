@@ -11,6 +11,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
@@ -65,7 +66,7 @@ fun ProfileScreen() {
         topBar = {
             SmallTopAppBar(
                 title = { Text("Mi Perfil", style = MaterialTheme.typography.headlineSmall) },
-                colors = TopAppBarDefaults.smallTopAppBarColors(containerColor = MaterialTheme.colorScheme.primary)
+                colors = TopAppBarDefaults.smallTopAppBarColors(containerColor = Color(0xFF00695C)) // Verde petróleo
             )
         },
         floatingActionButton = {
@@ -97,7 +98,7 @@ fun ProfileScreen() {
                         }
                         isEditing = false
                     },
-                    containerColor = MaterialTheme.colorScheme.primary
+                    containerColor = Color(0xFF00695C) // Verde petróleo
                 ) {
                     Icon(Icons.Filled.Edit, contentDescription = "Guardar cambios")
                 }
@@ -115,14 +116,14 @@ fun ProfileScreen() {
             Card(
                 modifier = Modifier.size(120.dp),
                 shape = MaterialTheme.shapes.extraLarge,
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+                colors = CardDefaults.cardColors(containerColor = Color(0xFFECEFF1)), // Gris humo
                 elevation = CardDefaults.cardElevation(8.dp)
             ) {
                 Icon(
                     imageVector = Icons.Filled.Edit,
                     contentDescription = "Foto de perfil",
                     modifier = Modifier.size(100.dp),
-                    tint = MaterialTheme.colorScheme.primary
+                    tint = Color(0xFF00695C) // Verde petróleo
                 )
             }
 
@@ -282,7 +283,8 @@ fun AuctionItem(auction: Auction) {
                 // Aquí agregarías la navegación a la pantalla de detalles de la subasta
                 // navController.navigate("auctionDetails/${auction.id}")
             },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.align(Alignment.CenterHorizontally),
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00695C)) // Verde petróleo
         ) {
             Text(text = "Ver detalles")
         }

@@ -112,7 +112,7 @@ fun AuctionItem(auction: Auction, navController: NavController) {
 
             // Precio de la subasta
             Text(
-                text = "Puja actual: ${auction.currentBid}",
+                text = "Precio inicial: \n${auction.startingPrice} €",
                 style = MaterialTheme.typography.body1.copy(fontWeight = FontWeight.Bold),
                 color = Color(0xFFFF7043) // Naranja coral (secundario)
             )

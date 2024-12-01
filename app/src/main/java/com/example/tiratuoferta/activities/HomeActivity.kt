@@ -96,9 +96,10 @@ fun MainScreen() {
                 if (showFab) {
                     FloatingActionButton(
                         onClick = { navController.navigate("createAuction") },
-                        modifier = Modifier.padding(16.dp)
+                        modifier = Modifier.padding(16.dp),
+                        backgroundColor = Color(0xFFFF7043) // Naranja coral
                     ) {
-                        Icon(Icons.Filled.Add, contentDescription = "Add")
+                        Icon(Icons.Filled.Add, contentDescription = "Add", tint = Color.White)
                     }
                 }
             }

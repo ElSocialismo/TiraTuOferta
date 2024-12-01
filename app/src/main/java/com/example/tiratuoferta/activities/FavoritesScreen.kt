@@ -10,6 +10,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
@@ -40,8 +41,15 @@ fun FavoritesScreen(navController: NavController) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Favoritos", style = MaterialTheme.typography.titleLarge) },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = MaterialTheme.colorScheme.primary)
+                title = {
+                    Text("Favoritos", style = MaterialTheme.typography.titleLarge.copy(color = Color.White)) // Negro más fuerte
+                },
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                    containerColor = Color(0xFF00695C), // Verde petróleo
+                    titleContentColor = Color.White // Negro fuerte
+                )
+
+
             )
         }
     ) { innerPadding ->
@@ -49,7 +57,7 @@ fun FavoritesScreen(navController: NavController) {
             if (favoriteAuctions.isEmpty()) {
                 // Si no hay subastas favoritas, mostramos un mensaje
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text(text = "No tienes subastas favoritas.", style = MaterialTheme.typography.bodyLarge)
+                    Text(text = "No tienes subastas favoritas.", style = MaterialTheme.typography.bodyLarge, color = Color(0xFF37474F)) // Negro carbón
                 }
             } else {
                 // Si hay subastas favoritas, las mostramos en una lista
@@ -110,7 +118,10 @@ fun AuctionItem(auction: Auction, navController: NavController, isFavorite: Bool
             .fillMaxWidth()
             .padding(vertical = 8.dp)  // Separación entre las tarjetas
             .clickable { navController.navigate("auctionDetails/${auction.id}") },  // Navegar al detalle de la subasta
-        shape = MaterialTheme.shapes.medium
+        shape = MaterialTheme.shapes.medium,
+        colors = CardDefaults.cardColors(
+            containerColor = Color(0xFFECEFF1) // Gris humo
+        )
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             // Mostrar imagen de la subasta
@@ -127,7 +138,7 @@ fun AuctionItem(auction: Auction, navController: NavController, isFavorite: Bool
             // Mostrar título de la subasta
             Text(
                 text = auction.title,
-                style = MaterialTheme.typography.titleMedium,
+                style = MaterialTheme.typography.titleMedium.copy(color = Color(0xFF37474F)), // Negro carbón
                 modifier = Modifier.padding(bottom = 4.dp)
             )
 
@@ -135,21 +146,21 @@ fun AuctionItem(auction: Auction, navController: NavController, isFavorite: Bool
             Text(
                 text = auction.description,
                 maxLines = 2,
-                style = MaterialTheme.typography.bodyMedium,
+                style = MaterialTheme.typography.bodyMedium.copy(color = Color(0xFF37474F)), // Negro carbón
                 modifier = Modifier.padding(bottom = 8.dp)
             )
 
             // Mostrar fecha de finalización de la subasta
             Text(
                 text = "Termina el: $endDate",
-                style = MaterialTheme.typography.bodySmall,
+                style = MaterialTheme.typography.bodySmall.copy(color = Color(0xFF37474F)), // Negro carbón
                 modifier = Modifier.padding(bottom = 8.dp)
             )
 
             // Mostrar el precio actual de la subasta
             Text(
                 text = "Precio actual: ${auction.currentBid}$",
-                style = MaterialTheme.typography.bodyLarge,
+                style = MaterialTheme.typography.bodyLarge.copy(color = Color(0xFF37474F)), // Negro carbón
                 modifier = Modifier.padding(bottom = 8.dp)
             )
 
@@ -158,9 +169,10 @@ fun AuctionItem(auction: Auction, navController: NavController, isFavorite: Bool
                 onClick = { navController.navigate("auctionDetails/${auction.id}") },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 8.dp)
+                    .padding(bottom = 8.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF7043)) // Naranja coral
             ) {
-                Text("Ver Detalles")
+                Text("Ver Detalles", color = Color.White)
             }
 
             // Mostrar botón de "Agregar a Favoritos" solo si no está en favoritos
@@ -169,9 +181,10 @@ fun AuctionItem(auction: Auction, navController: NavController, isFavorite: Bool
                     onClick = {
                         addToFavorites(auction.id, context)  // Llamar a la función para agregar a favoritos
                     },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF7043)) // Naranja coral
                 ) {
-                    Text("Agregar a Favoritos")
+                    Text("Agregar a Favoritos", color = Color.White)
                 }
             }
         }
