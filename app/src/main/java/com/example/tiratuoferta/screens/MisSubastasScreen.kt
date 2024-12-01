@@ -15,4 +15,5 @@ fun MisSubastasScreen() {
     ) {
         Text("Mis Subastas")
     }
+
 }
