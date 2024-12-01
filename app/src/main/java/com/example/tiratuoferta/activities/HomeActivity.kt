@@ -144,18 +144,27 @@ fun MainScreen() {
                 composable("chat/{auctionId}") { backStackEntry ->
                     val auctionId = backStackEntry.arguments?.getString("auctionId") ?: ""
                     if (auctionId.isNotEmpty()) {
-                        // Llama a tu pantalla de chat pasando el auctionId
                         ChatScreen(navController = navController, auctionId = auctionId)
                     } else {
                         Log.e("Navigation", "Auction ID vacío")
                     }
                 }
+
+                // Para los chats personales, pasamos chatId
+                composable("personalChat/{chatId}") { backStackEntry ->
+                    val chatId = backStackEntry.arguments?.getString("chatId") ?: ""
+                    if (chatId.isNotEmpty()) {
+                        PersonalChatScreen(navController = navController, chatId = chatId)
+                    } else {
+                        Log.e("Navigation", "Chat ID vacío")
+                    }
+                }
+
                 composable("categoryAuctionList/{category}") { backStackEntry ->
                     val category = backStackEntry.arguments?.getString("category") ?: ""
                     CategoryAuctionListScreen(navController = navController, category = category)
                 }
 
-                // Ruta para editar subastas
                 composable("editAuction/{auctionId}") { backStackEntry ->
                     val auctionId = backStackEntry.arguments?.getString("auctionId") ?: ""
                     if (auctionId.isNotEmpty()) {
@@ -173,8 +182,6 @@ fun MainScreen() {
         }
     }
 }
-
-
 
 fun saveAuctionToFirebase(auction: Auction) {
     // Verificar que auction.id no sea nulo o vacío
