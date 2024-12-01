@@ -21,6 +21,7 @@ import com.google.firebase.auth.UserProfileChangeRequest
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen() {
     val auth = FirebaseAuth.getInstance()
@@ -35,6 +36,8 @@ fun ProfileScreen() {
     var showPasswordUpdatedToast by remember { mutableStateOf(false) }
     var showNameUpdatedToast by remember { mutableStateOf(false) }
     var showErrorToast by remember { mutableStateOf(false) }
+
+    var showToast by remember { mutableStateOf<Pair<Boolean, String>>(false to "") }
 
     // Control del contexto
     val context = LocalContext.current
@@ -58,109 +61,130 @@ fun ProfileScreen() {
         }
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        // Título
-        Text(text = "Mi Perfil", style = MaterialTheme.typography.headlineMedium)
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Información básica (Nombre y Correo)
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            if (isEditing) {
-                BasicTextField(
-                    value = fullName,
-                    onValueChange = { fullName = it },
-                    modifier = Modifier.fillMaxWidth()
-                )
-            } else {
-                Text(text = "Nombre: $fullName", style = MaterialTheme.typography.bodyMedium)
-            }
-            IconButton(onClick = { isEditing = !isEditing }) {
-                Icon(imageVector = Icons.Filled.Edit, contentDescription = "Editar nombre")
-            }
-        }
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        // Correo electrónico
-        Text(text = "Correo: $email", style = MaterialTheme.typography.bodyMedium)
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Cambiar contraseña (si es necesario)
-        if (isEditing) {
-            TextField(
-                value = newPassword,
-                onValueChange = { newPassword = it },
-                label = { Text("Nueva contraseña") },
-                visualTransformation = PasswordVisualTransformation(),  // Sin la funcionalidad de visibilidad
-                modifier = Modifier.fillMaxWidth()
+    Scaffold(
+        topBar = {
+            SmallTopAppBar(
+                title = { Text("Mi Perfil", style = MaterialTheme.typography.headlineSmall) },
+                colors = TopAppBarDefaults.smallTopAppBarColors(containerColor = MaterialTheme.colorScheme.primary)
             )
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Botón para guardar cambios (si se están editando)
-        if (isEditing) {
-            Button(
-                onClick = {
-                    // Lógica para actualizar los datos
-                    if (newPassword.isNotEmpty()) {
-                        user?.updatePassword(newPassword)?.addOnCompleteListener { task ->
-                            if (task.isSuccessful) {
-                                // Mostrar Toast cuando la contraseña se actualice correctamente
-                                showPasswordUpdatedToast = true
-                            } else {
-                                // Si ocurre un error al actualizar la contraseña
-                                showErrorToast = true
+        },
+        floatingActionButton = {
+            if (isEditing) {
+                FloatingActionButton(
+                    onClick = {
+                        // Guardar cambios
+                        if (newPassword.isNotEmpty()) {
+                            user?.updatePassword(newPassword)?.addOnCompleteListener { task ->
+                                showToast = if (task.isSuccessful) {
+                                    true to "Contraseña actualizada"
+                                } else {
+                                    true to "Error al actualizar la contraseña"
+                                }
                             }
                         }
-                    }
-                    if (fullName != user?.displayName) {
-                        user?.updateProfile(
-                            UserProfileChangeRequest.Builder()
-                                .setDisplayName(fullName)
-                                .build()
-                        )?.addOnCompleteListener { task ->
-                            if (task.isSuccessful) {
-                                // Mostrar Toast cuando el nombre se actualice correctamente
-                                showNameUpdatedToast = true
-                            } else {
-                                // Si ocurre un error al actualizar el nombre
-                                showErrorToast = true
+                        if (fullName != user?.displayName) {
+                            user?.updateProfile(
+                                UserProfileChangeRequest.Builder()
+                                    .setDisplayName(fullName)
+                                    .build()
+                            )?.addOnCompleteListener { task ->
+                                showToast = if (task.isSuccessful) {
+                                    true to "Nombre actualizado"
+                                } else {
+                                    true to "Error al actualizar el nombre"
+                                }
                             }
                         }
-                    }
-                },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Guardar cambios")
+                        isEditing = false
+                    },
+                    containerColor = MaterialTheme.colorScheme.primary
+                ) {
+                    Icon(Icons.Filled.Edit, contentDescription = "Guardar cambios")
+                }
             }
         }
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .padding(innerPadding)
+                .padding(16.dp)
+                .fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            // Foto de perfil
+            Card(
+                modifier = Modifier.size(120.dp),
+                shape = MaterialTheme.shapes.extraLarge,
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+                elevation = CardDefaults.cardElevation(8.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Edit,
+                    contentDescription = "Foto de perfil",
+                    modifier = Modifier.size(100.dp),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
 
-        Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-        // Mis subastas
-        Text(text = "Mis Subastas Creadas", style = MaterialTheme.typography.headlineSmall)
+            // Información del usuario
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                elevation = CardDefaults.cardElevation(4.dp)
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(text = "Nombre", style = MaterialTheme.typography.labelMedium)
+                    if (isEditing) {
+                        TextField(
+                            value = fullName,
+                            onValueChange = { fullName = it },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    } else {
+                        Text(text = fullName, style = MaterialTheme.typography.bodyLarge)
+                    }
 
-        // Subastas creadas por el usuario
-        SubastasCreadas(userId = user?.uid ?: "")
+                    Spacer(modifier = Modifier.height(8.dp))
 
-        Spacer(modifier = Modifier.height(32.dp))
+                    Text(text = "Correo", style = MaterialTheme.typography.labelMedium)
+                    Text(text = email, style = MaterialTheme.typography.bodyLarge)
+                }
+            }
 
-        // Subastas en las que participo
-        Text(text = "Subastas en las que participo", style = MaterialTheme.typography.headlineSmall)
+            Spacer(modifier = Modifier.height(16.dp))
 
-        // Subastas en las que el usuario ha participado
-        SubastasParticipadas(userId = user?.uid ?: "")
+            // Subastas creadas
+            ProfileSection(title = "Mis Subastas Creadas") {
+                SubastasCreadas(userId = user?.uid ?: "")
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Subastas en las que participo
+            ProfileSection(title = "Subastas en las que participo") {
+                SubastasParticipadas(userId = user?.uid ?: "")
+            }
+        }
     }
 }
 
+@Composable
+fun ProfileSection(title: String, content: @Composable () -> Unit) {
+    Column {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.padding(vertical = 8.dp)
+        )
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            elevation = CardDefaults.cardElevation(2.dp)
+        ) {
+            content()
+        }
+    }
+}
 
 @Composable
 fun SubastasCreadas(userId: String) {

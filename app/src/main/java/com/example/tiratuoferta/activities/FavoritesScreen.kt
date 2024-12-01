@@ -1,6 +1,7 @@
 import android.content.Context
 import android.widget.Toast
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -8,6 +9,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
@@ -38,7 +40,8 @@ fun FavoritesScreen(navController: NavController) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Favoritos") }
+                title = { Text("Favoritos", style = MaterialTheme.typography.titleLarge) },
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = MaterialTheme.colorScheme.primary)
             )
         }
     ) { innerPadding ->
@@ -46,13 +49,20 @@ fun FavoritesScreen(navController: NavController) {
             if (favoriteAuctions.isEmpty()) {
                 // Si no hay subastas favoritas, mostramos un mensaje
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text(text = "No tienes subastas favoritas.")
+                    Text(text = "No tienes subastas favoritas.", style = MaterialTheme.typography.bodyLarge)
                 }
             } else {
                 // Si hay subastas favoritas, las mostramos en una lista
-                LazyColumn(modifier = Modifier.fillMaxSize()) {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(16.dp)
+                ) {
                     items(favoriteAuctions) { auction ->
-                        AuctionItem(auction = auction, navController = navController, isFavorite = favoriteAuctionIds.contains(auction.id))
+                        AuctionItem(
+                            auction = auction,
+                            navController = navController,
+                            isFavorite = favoriteAuctionIds.contains(auction.id)
+                        )
                     }
                 }
             }
@@ -95,52 +105,74 @@ fun AuctionItem(auction: Auction, navController: NavController, isFavorite: Bool
 
     val context = LocalContext.current  // Obtener el contexto dentro del composable
 
-    Column(modifier = Modifier.padding(16.dp)) {
-        // Mostrar imagen de la subasta
-        AsyncImage(
-            model = auction.imageUrl,
-            contentDescription = "Imagen de subasta",
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(200.dp)
-                .padding(bottom = 8.dp)
-        )
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp)  // Separación entre las tarjetas
+            .clickable { navController.navigate("auctionDetails/${auction.id}") },  // Navegar al detalle de la subasta
+        shape = MaterialTheme.shapes.medium
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            // Mostrar imagen de la subasta
+            AsyncImage(
+                model = auction.imageUrl,
+                contentDescription = "Imagen de subasta",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(200.dp)
+                    .padding(bottom = 12.dp)
+                    .clip(MaterialTheme.shapes.medium)
+            )
 
-        // Mostrar título de la subasta
-        Text(text = auction.title, style = MaterialTheme.typography.titleMedium)
-        Spacer(modifier = Modifier.height(8.dp))
+            // Mostrar título de la subasta
+            Text(
+                text = auction.title,
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.padding(bottom = 4.dp)
+            )
 
-        // Mostrar descripción de la subasta
-        Text(text = auction.description, maxLines = 2, style = MaterialTheme.typography.bodyMedium)
-        Spacer(modifier = Modifier.height(8.dp))
+            // Mostrar descripción de la subasta
+            Text(
+                text = auction.description,
+                maxLines = 2,
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
 
-        // Mostrar fecha de finalización de la subasta
-        Text(text = "Termina el: $endDate", style = MaterialTheme.typography.bodySmall)
-        Spacer(modifier = Modifier.height(8.dp))
+            // Mostrar fecha de finalización de la subasta
+            Text(
+                text = "Termina el: $endDate",
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
 
-        // Mostrar el precio actual de la subasta
-        Text(text = "Precio actual: ${auction.currentBid}$", style = MaterialTheme.typography.bodyLarge)
-        Spacer(modifier = Modifier.height(8.dp))
+            // Mostrar el precio actual de la subasta
+            Text(
+                text = "Precio actual: ${auction.currentBid}$",
+                style = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
 
-        // Botón para navegar a los detalles de la subasta
-        Button(
-            onClick = {
-                navController.navigate("auctionDetails/${auction.id}")
-            },
-            modifier = Modifier.padding(top = 8.dp)
-        ) {
-            Text("Ver Detalles")
-        }
-
-        // Mostrar botón de "Agregar a Favoritos" solo si no está en favoritos
-        if (!isFavorite) {
+            // Botón para navegar a los detalles de la subasta
             Button(
-                onClick = {
-                    addToFavorites(auction.id, context)  // Llamar a la función para agregar a favoritos
-                },
-                modifier = Modifier.padding(top = 8.dp)
+                onClick = { navController.navigate("auctionDetails/${auction.id}") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 8.dp)
             ) {
-                Text("Agregar a Favoritos")
+                Text("Ver Detalles")
+            }
+
+            // Mostrar botón de "Agregar a Favoritos" solo si no está en favoritos
+            if (!isFavorite) {
+                Button(
+                    onClick = {
+                        addToFavorites(auction.id, context)  // Llamar a la función para agregar a favoritos
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Agregar a Favoritos")
+                }
             }
         }
     }
