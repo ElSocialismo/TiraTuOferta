@@ -83,7 +83,7 @@ fun MainScreen() {
                             Icon(Icons.Filled.Menu, contentDescription = "Menu")
                         }
                     },
-                    backgroundColor = Color(0xFF6200EE),
+                    backgroundColor = Color(0xFF00695C), // Verde petróleo
                     contentColor = Color.White,
                     elevation = 12.dp
                 )
