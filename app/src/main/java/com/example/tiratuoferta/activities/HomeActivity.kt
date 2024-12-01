@@ -64,40 +64,55 @@ class HomeActivity : ComponentActivity() {
 @Composable
 fun MainScreen() {
     val navController = rememberNavController()
-    val drawerState = rememberDrawerState(DrawerValue.Closed) // Crear estado del drawer
+    val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
     ModalDrawer(
         drawerState = drawerState,
         drawerContent = {
-            DrawerContent(navController, drawerState)  // Pasar el drawerState aquí
+            DrawerContent(navController, drawerState)
         }
     ) {
         Scaffold(
             topBar = {
                 TopAppBar(
-                    title = { Text("TiraTuOferta") },
+                    title = {
+                        Text(
+                            text = "TiraTuOferta",
+                            style = MaterialTheme.typography.h5,
+                            color = Color.White
+                        )
+                    },
                     navigationIcon = {
                         IconButton(onClick = { scope.launch { drawerState.open() } }) {
-                            Icon(Icons.Filled.Menu, contentDescription = "Menu")
+                            Icon(
+                                imageVector = Icons.Filled.Menu,
+                                contentDescription = "Abrir menú",
+                                tint = Color.White
+                            )
                         }
                     },
-                    backgroundColor = Color(0xFF6200EE),
-                    contentColor = Color.White,
-                    elevation = 12.dp
+                    backgroundColor = Color(0xFF00695C), // Verde petróleo
+                    elevation = 10.dp
                 )
             },
             bottomBar = {
-                BottomNavBar(navController) // Aquí pasa el navController al BottomNavBar
+                BottomNavBar(navController)
             },
             floatingActionButton = {
                 FloatingActionButton(
                     onClick = { navController.navigate("createAuction") },
-                    modifier = Modifier.padding(16.dp)
+                    backgroundColor = Color(0xFFFF7043), // Naranja coral
+                    contentColor = Color.White,
+                    elevation = FloatingActionButtonDefaults.elevation(8.dp)
                 ) {
-                    Icon(Icons.Filled.Add, contentDescription = "Add")
+                    Icon(
+                        imageVector = Icons.Filled.Add,
+                        contentDescription = "Crear Subasta"
+                    )
                 }
-            }
+            },
+            backgroundColor = Color(0xFFECEFF1) // Gris humo
         ) { innerPadding ->
             NavHost(
                 navController = navController,
@@ -118,7 +133,6 @@ fun MainScreen() {
                     if (auctionId.isNotEmpty()) {
                         AuctionDetailsScreen(navController = navController, auctionId = auctionId)
                     } else {
-                        // Manejo de caso si auctionId está vacío
                         Log.e("Navigation", "Auction ID vacío")
                     }
                 }
@@ -130,13 +144,10 @@ fun MainScreen() {
                         Log.e("Navigation", "Auction ID vacío")
                     }
                 }
-
                 composable("categoryAuctionList/{category}") { backStackEntry ->
                     val category = backStackEntry.arguments?.getString("category") ?: ""
                     CategoryAuctionListScreen(navController = navController, category = category)
                 }
-
-                // Ruta para editar subastas
                 composable("editAuction/{auctionId}") { backStackEntry ->
                     val auctionId = backStackEntry.arguments?.getString("auctionId") ?: ""
                     if (auctionId.isNotEmpty()) {
@@ -145,8 +156,6 @@ fun MainScreen() {
                         Log.e("Navigation", "Auction ID vacío")
                     }
                 }
-
-                // Otras pantallas
                 composable("misSubastas") { MisSubastasScreen(navController = navController) }
                 composable("contactar") { ContactarScreen() }
                 composable("ayuda") { AyudaScreen() }
