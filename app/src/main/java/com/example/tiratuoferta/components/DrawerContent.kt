@@ -64,6 +64,17 @@ fun DrawerContent(navController: NavController, drawerState: DrawerState) {
             }
         }
 
+        // Agregar item para "Chats Personales"
+        DrawerItem("Chats Personales") {
+            scope.launch { drawerState.close() }
+            // Asignamos un chatId predeterminado o lo obtienes dinámicamente
+            val chatId = "defaultChatId" // Aquí puedes poner un valor dinámico si lo tienes
+            navController.navigate("personalChat/$chatId") {
+                popUpTo(BottomNavItem.Home.route) { inclusive = true }
+                launchSingleTop = true
+            }
+        }
+
         // Botón de Cerrar Sesión
         DrawerItem("Cerrar sesión") {
             showLogoutDialog = true
@@ -88,6 +99,8 @@ fun DrawerContent(navController: NavController, drawerState: DrawerState) {
         )
     }
 }
+
+
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
