@@ -20,7 +20,7 @@ fun DrawerContent(navController: NavController, drawerState: DrawerState) {
     val scope = rememberCoroutineScope()
     var showLogoutDialog by remember { mutableStateOf(false) }
 
-    Column (
+    Column(
         modifier = Modifier.padding(16.dp)
     ) {
         Text(
@@ -64,16 +64,15 @@ fun DrawerContent(navController: NavController, drawerState: DrawerState) {
             }
         }
 
-        // Agregar item para "Chats Personales"
-        DrawerItem("Chats Personales") {
+        // Cambiar la opción de "Chats Personales" por "Usuarios Registrados"
+        DrawerItem("Usuarios Registrados") {
             scope.launch { drawerState.close() }
-            // Asignamos un chatId predeterminado o lo obtienes dinámicamente
-            val chatId = "defaultChatId" // Aquí puedes poner un valor dinámico si lo tienes
-            navController.navigate("personalChat/$chatId") {
+            navController.navigate("userList") {
                 popUpTo(BottomNavItem.Home.route) { inclusive = true }
                 launchSingleTop = true
             }
         }
+
 
         // Botón de Cerrar Sesión
         DrawerItem("Cerrar sesión") {
@@ -99,6 +98,7 @@ fun DrawerContent(navController: NavController, drawerState: DrawerState) {
         )
     }
 }
+
 
 
 

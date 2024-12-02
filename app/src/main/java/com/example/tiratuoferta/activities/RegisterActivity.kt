@@ -2,6 +2,7 @@ package com.example.tiratuoferta.activities
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -223,6 +224,11 @@ fun RegisterScreen(onRegisterSuccess: () -> Unit) {
                                         dbRef.child("users").child(userId).setValue(user)
                                             .addOnSuccessListener {
                                                 registerResult = "Registration successful!"
+
+                                                // Crear el chat con otro usuario
+                                                val otherUserId = "someOtherUserId" // Aquí puedes poner el ID de un usuario existente o predeterminado
+                                                createChat(userId, otherUserId) // Crea un chat único entre los dos usuarios
+
                                                 onRegisterSuccess() // Redirige o realiza la acción
                                             }
                                             .addOnFailureListener { e ->
@@ -235,6 +241,8 @@ fun RegisterScreen(onRegisterSuccess: () -> Unit) {
                                     registerResult = "Registration failed: ${task.exception?.message}"
                                 }
                             }
+
+
                     }
                 },
                 modifier = Modifier
@@ -260,3 +268,26 @@ fun RegisterScreen(onRegisterSuccess: () -> Unit) {
         }
     }
 }
+// Función para crear un chat entre dos usuarios
+fun createChat(userId1: String, userId2: String) {
+    // Crear el ID del chat basado en los IDs de los usuarios
+    val chatId = if (userId1 < userId2) "$userId1-$userId2" else "$userId2-$userId1"
+
+    // Crear una referencia en la base de datos de Firebase
+    val dbRef = FirebaseDatabase.getInstance().getReference("chats").child(chatId)
+
+    // Crear un objeto de chat con los detalles de los usuarios
+    val chat = mapOf(
+        "user1" to userId1,
+        "user2" to userId2,
+        "createdAt" to System.currentTimeMillis()
+    )
+
+    // Guardar el chat en Firebase
+    dbRef.setValue(chat).addOnSuccessListener {
+        Log.d("Chat", "Chat creado con ID: $chatId")
+    }.addOnFailureListener { e ->
+        Log.e("Chat", "Error al crear el chat: ${e.message}")
+    }
+}
+

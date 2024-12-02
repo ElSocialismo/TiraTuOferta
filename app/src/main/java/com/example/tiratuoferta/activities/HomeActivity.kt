@@ -14,6 +14,7 @@ import androidx.compose.material.icons.filled.Menu
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
@@ -80,7 +81,7 @@ fun MainScreen() {
                     title = { Text("TiraTuOferta") },
                     navigationIcon = {
                         IconButton(onClick = { scope.launch { drawerState.open() } }) {
-                            Icon(Icons.Filled.Menu, contentDescription = "Menu")
+                            Icon(painter = painterResource(id = android.R.drawable.ic_menu_rotate), contentDescription = "Menu")
                         }
                     },
                     backgroundColor = Color(0xFF00695C), // Verde petróleo
@@ -151,7 +152,9 @@ fun MainScreen() {
                     }
                 }
 
-                // Para los chats personales, pasamos chatId
+                // Nueva ruta para la lista de usuarios
+                composable("userList") { UserListScreen(navController = navController) }
+
                 composable("personalChat/{chatId}") { backStackEntry ->
                     val chatId = backStackEntry.arguments?.getString("chatId") ?: ""
                     if (chatId.isNotEmpty()) {
@@ -160,7 +163,6 @@ fun MainScreen() {
                         Log.e("Navigation", "Chat ID vacío")
                     }
                 }
-
                 composable("categoryAuctionList/{category}") { backStackEntry ->
                     val category = backStackEntry.arguments?.getString("category") ?: ""
                     CategoryAuctionListScreen(navController = navController, category = category)
@@ -175,7 +177,8 @@ fun MainScreen() {
                     }
                 }
 
-                // Otras pantallas
+
+                // Otras rutas
                 composable("misSubastas") { MisSubastasScreen(navController = navController) }
                 composable("contactar") { ContactarScreen() }
                 composable("ayuda") { AyudaScreen() }
@@ -183,6 +186,7 @@ fun MainScreen() {
         }
     }
 }
+
 
 fun saveAuctionToFirebase(auction: Auction) {
     // Verificar que auction.id no sea nulo o vacío
