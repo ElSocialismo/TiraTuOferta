@@ -136,7 +136,7 @@ fun AuctionItem(
 
             // Mostrar el precio actual de la subasta
             Text(
-                text = "Precio actual: ${auction.currentBid}$",
+                text = "Puja actual: ${auction.currentBid}$",
                 style = MaterialTheme.typography.bodyLarge,
                 color = Color(0xFF00695C) // Verde petróleo
             )
