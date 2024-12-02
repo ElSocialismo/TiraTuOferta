@@ -114,7 +114,7 @@ fun PlaceBidScreen(navController: NavController, auctionId: String) {
                     val lastBid = bidHistory.last()
                     if (lastBid.userId == userId) {
                         // Si el usuario actual hizo la última puja, entonces es el ganador
-                        sendNotification(context, "¡Felicidades!", "¡Ganaste la subasta procede con el pago!")
+                        sendNotification(context, "¡Felicidades!", "¡Ganaste la subasta !")
                     }
                 }
             }
@@ -262,8 +262,10 @@ fun sendNotification(context: Context, title: String, message: String) {
         .setSmallIcon(android.R.drawable.ic_notification_overlay)
         .setContentTitle(title)
         .setContentText(message)
-        .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+        .setPriority(NotificationCompat.PRIORITY_HIGH)
+        .setAutoCancel(true)
         .build()
+
 
     // Mostrar la notificación
     notificationManager.notify(1, notification)

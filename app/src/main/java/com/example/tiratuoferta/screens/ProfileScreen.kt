@@ -112,20 +112,12 @@ fun ProfileScreen() {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             // Foto de perfil
-            Card(
-                modifier = Modifier.size(120.dp),
-                shape = MaterialTheme.shapes.extraLarge,
-                colors = CardDefaults.cardColors(containerColor = Color(0xFFECEFF1)), // Gris humo
-                elevation = CardDefaults.cardElevation(8.dp)
-            ) {
-                // Si deseas cargar una imagen desde Firebase Storage, usa un Image() aquí
-                Icon(
-                    imageVector = Icons.Filled.AccountCircle, // Cambiar por un icono o una imagen real si se tiene
-                    contentDescription = "Foto de perfil",
-                    modifier = Modifier.size(100.dp),
-                    tint = Color(0xFF00695C) // Verde petróleo
-                )
-            }
+            Icon(
+                imageVector = Icons.Filled.AccountCircle, // Cambiar por un icono o una imagen real si se tiene
+                contentDescription = "Foto de perfil",
+                modifier = Modifier.size(100.dp),
+                tint = Color(0xFF00695C) // Verde petróleo
+            )
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -262,7 +254,7 @@ fun SubastasParticipadas(userId: String) {
         }
     }
 }
-
+ 
 @Composable
 fun AuctionItem(auction: Auction) {
     // Mostrar la información de cada subasta

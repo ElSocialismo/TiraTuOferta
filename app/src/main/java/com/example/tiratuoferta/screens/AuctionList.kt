@@ -39,15 +39,19 @@ fun AuctionList(navController: NavController) {
     val auctionListener = object : ValueEventListener {
         override fun onDataChange(snapshot: DataSnapshot) {
             auctionList.clear()
+            val currentTime = System.currentTimeMillis() // Hora actual en milisegundos
             for (auctionSnapshot in snapshot.children) {
-                auctionSnapshot.getValue(Auction::class.java)?.let {
-                    auctionList.add(it)
+                auctionSnapshot.getValue(Auction::class.java)?.let { auction ->
+                    // Filtrar subastas activas (tiempo actual menor al tiempo de finalización)
+                    if (auction.endTime > currentTime) {
+                        auctionList.add(auction)
+                    }
                 }
             }
         }
 
         override fun onCancelled(error: DatabaseError) {
-            // Handle database error
+            // Manejar error en la base de datos
         }
     }
     database.addValueEventListener(auctionListener)
@@ -58,6 +62,7 @@ fun AuctionList(navController: NavController) {
         }
     }
 }
+
 
 @Composable
 fun AuctionItem(auction: Auction, navController: NavController) {

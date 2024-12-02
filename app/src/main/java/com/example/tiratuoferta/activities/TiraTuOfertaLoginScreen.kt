@@ -26,10 +26,13 @@ fun TiraTuOfertaLogin(
 
     val auth = FirebaseAuth.getInstance()
 
-    // Color de fondo para toda la pantalla
-    val backgroundColor = Color(0xFFF1F1F1) // Un gris suave, puedes cambiarlo por cualquier color de tu elección
+    // Colores personalizados
+    val primaryColor = Color(0xFF00695C)
+    val secondaryColor = Color(0xFFFF7043)
+    val backgroundColor = Color(0xFFECEFF1)
+    val textColor = Color(0xFF37474F)
+    val accentColor = Color(0xFFFDD835)
 
-    // Usamos Box para la pantalla con el color de fondo
     Box(modifier = Modifier.fillMaxSize().background(backgroundColor)) {
         Column(
             modifier = Modifier
@@ -43,20 +46,21 @@ fun TiraTuOfertaLogin(
                 text = "Tira Tu Oferta",
                 style = MaterialTheme.typography.headlineLarge.copy(fontSize = 32.sp),
                 modifier = Modifier.padding(bottom = 40.dp),
-                color = Color(0xFF6200EE)  // Color principal
+                color = primaryColor
             )
 
             // Campo de correo electrónico
             OutlinedTextField(
                 value = email,
                 onValueChange = { email = it },
-                label = { Text("Email") },
+                label = { Text("Email", color = textColor) },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(8.dp),
                 singleLine = true,
                 colors = TextFieldDefaults.outlinedTextFieldColors(
-                    focusedBorderColor = Color(0xFF6200EE),
-                    unfocusedBorderColor = Color.Gray
+                    focusedBorderColor = accentColor,
+                    unfocusedBorderColor = primaryColor,
+                    cursorColor = accentColor
                 )
             )
 
@@ -66,14 +70,15 @@ fun TiraTuOfertaLogin(
             OutlinedTextField(
                 value = password,
                 onValueChange = { password = it },
-                label = { Text("Password") },
+                label = { Text("Password", color = textColor) },
                 visualTransformation = PasswordVisualTransformation(),
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(8.dp),
                 singleLine = true,
                 colors = TextFieldDefaults.outlinedTextFieldColors(
-                    focusedBorderColor = Color(0xFF6200EE),
-                    unfocusedBorderColor = Color.Gray
+                    focusedBorderColor = accentColor,
+                    unfocusedBorderColor = primaryColor,
+                    cursorColor = accentColor
                 )
             )
 
@@ -96,7 +101,7 @@ fun TiraTuOfertaLogin(
                     .fillMaxWidth()
                     .height(56.dp),
                 shape = RoundedCornerShape(8.dp),
-                colors = ButtonDefaults.buttonColors(Color(0xFF6200EE))
+                colors = ButtonDefaults.buttonColors(primaryColor)
             ) {
                 Text(text = "Login", color = Color.White, fontSize = 18.sp)
             }
@@ -107,7 +112,7 @@ fun TiraTuOfertaLogin(
             TextButton(onClick = onRegisterClicked) {
                 Text(
                     text = "¿No tienes cuenta? Registrate",
-                    style = MaterialTheme.typography.bodyMedium.copy(color = Color(0xFF6200EE)),
+                    style = MaterialTheme.typography.bodyMedium.copy(color = secondaryColor)
                 )
             }
 
@@ -117,7 +122,7 @@ fun TiraTuOfertaLogin(
             if (loginResult.isNotEmpty()) {
                 Text(
                     text = loginResult,
-                    color = if (loginResult.contains("exitoso")) Color.Green else Color.Red,
+                    color = if (loginResult.contains("exitoso")) primaryColor else secondaryColor,
                     modifier = Modifier.padding(top = 8.dp),
                     style = MaterialTheme.typography.bodyMedium.copy(fontSize = 16.sp)
                 )
