@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -34,31 +35,17 @@ fun ProfileScreen() {
     var newPassword by remember { mutableStateOf("") }
 
     // Variables para manejar el estado de los Toast
-    var showPasswordUpdatedToast by remember { mutableStateOf(false) }
-    var showNameUpdatedToast by remember { mutableStateOf(false) }
-    var showErrorToast by remember { mutableStateOf(false) }
-
-    var showToast by remember { mutableStateOf<Pair<Boolean, String>>(false to "") }
+    var toastMessage by remember { mutableStateOf("") }
+    var showToast by remember { mutableStateOf(false) }
 
     // Control del contexto
     val context = LocalContext.current
 
     // Efecto para mostrar los Toasts
-    LaunchedEffect(showPasswordUpdatedToast) {
-        if (showPasswordUpdatedToast) {
-            Toast.makeText(context, "Contraseña actualizada", Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    LaunchedEffect(showNameUpdatedToast) {
-        if (showNameUpdatedToast) {
-            Toast.makeText(context, "Nombre actualizado", Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    LaunchedEffect(showErrorToast) {
-        if (showErrorToast) {
-            Toast.makeText(context, "Error al actualizar el nombre o la contraseña", Toast.LENGTH_SHORT).show()
+    LaunchedEffect(toastMessage) {
+        if (showToast) {
+            Toast.makeText(context, toastMessage, Toast.LENGTH_SHORT).show()
+            showToast = false // Reset after showing
         }
     }
 
@@ -74,29 +61,41 @@ fun ProfileScreen() {
                 FloatingActionButton(
                     onClick = {
                         // Guardar cambios
+                        var updateSuccessful = true
+
                         if (newPassword.isNotEmpty()) {
                             user?.updatePassword(newPassword)?.addOnCompleteListener { task ->
-                                showToast = if (task.isSuccessful) {
-                                    true to "Contraseña actualizada"
+                                if (task.isSuccessful) {
+                                    toastMessage = "Contraseña actualizada"
+                                    showToast = true
                                 } else {
-                                    true to "Error al actualizar la contraseña"
+                                    toastMessage = "Error al actualizar la contraseña"
+                                    showToast = true
+                                    updateSuccessful = false
                                 }
                             }
                         }
+
                         if (fullName != user?.displayName) {
                             user?.updateProfile(
                                 UserProfileChangeRequest.Builder()
                                     .setDisplayName(fullName)
                                     .build()
                             )?.addOnCompleteListener { task ->
-                                showToast = if (task.isSuccessful) {
-                                    true to "Nombre actualizado"
+                                if (task.isSuccessful) {
+                                    toastMessage = "Nombre actualizado"
+                                    showToast = true
                                 } else {
-                                    true to "Error al actualizar el nombre"
+                                    toastMessage = "Error al actualizar el nombre"
+                                    showToast = true
+                                    updateSuccessful = false
                                 }
                             }
                         }
-                        isEditing = false
+
+                        if (updateSuccessful) {
+                            isEditing = false
+                        }
                     },
                     containerColor = Color(0xFF00695C) // Verde petróleo
                 ) {
@@ -119,8 +118,9 @@ fun ProfileScreen() {
                 colors = CardDefaults.cardColors(containerColor = Color(0xFFECEFF1)), // Gris humo
                 elevation = CardDefaults.cardElevation(8.dp)
             ) {
+                // Si deseas cargar una imagen desde Firebase Storage, usa un Image() aquí
                 Icon(
-                    imageVector = Icons.Filled.Edit,
+                    imageVector = Icons.Filled.AccountCircle, // Cambiar por un icono o una imagen real si se tiene
                     contentDescription = "Foto de perfil",
                     modifier = Modifier.size(100.dp),
                     tint = Color(0xFF00695C) // Verde petróleo
@@ -262,8 +262,6 @@ fun SubastasParticipadas(userId: String) {
         }
     }
 }
-
-
 
 @Composable
 fun AuctionItem(auction: Auction) {
